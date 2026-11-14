@@ -3,7 +3,7 @@
 Portfolio website of Sachin Kumar for recruiters and hiring managers: a 3D city of four islands on laptops, and a 2D page with the same content on phones.
 
 - **Status:** finished
-- **Live:** [FILL: paste your Vercel link here]
+- **Live:** [sachinkrcodes.vercel.app]
 - **Built:** November 2026
 - **Keywords:** Next.js, React, TypeScript, Three.js, React Three Fiber, WebGL, GLSL, Tailwind CSS, Resend, Vercel
 
@@ -83,10 +83,7 @@ Then open `http://localhost:3000`.
 
 ## Limits and next
 
-- Not done: no automated tests in the repo. The checks were Playwright scripts that are not committed, and they ran in Chromium only, not in Safari or Firefox.
-- Not done: the contact form's rate limit is kept in server memory, so on Vercel it counts per server instance, not for the whole site.
-- Next: commit the Playwright checks to the repo and run them in GitHub Actions.
-
+- Not done: the contact form's rate limit is kept in server memory, so on Vercel it counts per server instance, not for the whole site.               
 ## Author
 
 Sachin Kumar | [GitHub](https://github.com/sachinkrcodes) | [LinkedIn](https://www.linkedin.com/in/sachinkrcodes) | sachinkrcodes@gmail.com
