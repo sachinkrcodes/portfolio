@@ -3,7 +3,7 @@
 Portfolio website of Sachin Kumar for recruiters and hiring managers: a 3D city of four islands on laptops, and a 2D page with the same content on phones.
 
 - **Status:** finished
-- **Live:** [sachinkrcodes.vercel.app]
+- **Live:** https://sachinkrcodes.vercel.app
 - **Built:** November 2026
 - **Keywords:** Next.js, React, TypeScript, Three.js, React Three Fiber, WebGL, GLSL, Tailwind CSS, Resend, Vercel
 
