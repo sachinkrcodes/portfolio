@@ -9,7 +9,7 @@ import { validateContact, type ContactReply, type ContactValues } from "@/lib/co
  *  3. A per-IP rate limit (5 messages per 10 minutes). It lives in this server's memory, so on serverless hosting it is
  *     best effort per instance. It stops a script hammering one instance; use a real store (Upstash, Vercel Firewall) if you ever need more.
  *  4. The same validation the browser runs (src/lib/contact.ts), because browser checks can be skipped.
- *  5. Send through a mail provider chosen by environment variables (README, "Contact form"):
+ *  5. Send through a mail provider chosen by environment variables (docs/GUIDE.md, "Contact form"):
  *       RESEND_API_KEY (+ optional CONTACT_TO_EMAIL, CONTACT_FROM)   -> Resend
  *       FORMSPREE_ID                                                -> Formspree
  *     With neither set the route answers 503 "not_configured" and the form tells the visitor to use email.

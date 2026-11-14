@@ -19,7 +19,7 @@ export const MASTER = 0.9;
 /** the safety limiter at the end of the chain. It only touches loud peaks. */
 const LIMITER = { threshold: -3, knee: 3, ratio: 20 };
 /**
- * How loud the ambient bed is. Measured offline (see the README, "Sound"): about -28 dBFS RMS, which is background level,
+ * How loud the ambient bed is. Measured offline (see docs/GUIDE.md, "Sound"): about -28 dBFS RMS, which is background level,
  * far below the level of music. The cues below are set to sit a few dB above it, so they are heard but never sharp.
  */
 const BED_LEVEL = 0.07;

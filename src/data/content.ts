@@ -4,7 +4,7 @@
  * Sources: Sachin's resume v7C and the code and READMEs of his GitHub repos (the case study numbers are counted
  * from the code). Nothing here is invented: numbers, dates and issuers come from those.
  *
- * QUICK RECIPES (more in README.md, "Change the words"):
+ * QUICK RECIPES (more in docs/GUIDE.md, "Change the words"):
  *   new full case study        -> add an object to `projects` (it works everywhere, no other file needs a change)
  *   small / mini project       -> add an object to `miniProjects`
  *   a SigmaX project is done   -> delete its name from `sigmax.plannedProjects`, add it to `miniProjects` or `projects`
