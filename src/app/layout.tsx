@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   creator: profile.name,
   keywords: [profile.name, profile.role, ...profile.stack, "portfolio", profile.location.city],
   alternates: { canonical: "/" },
-  // the share picture comes from app/opengraph-image.tsx (made from content.ts), the icons from app/icon.tsx and app/apple-icon.tsx
+  // the share picture comes from app/opengraph-image.tsx (made from content.ts), the icons are the logo files app/icon.png, app/apple-icon.png and app/favicon.ico
   openGraph: { title: site.title, description: site.description, type: "website", locale: "en_IN", siteName: profile.name, url: "/" },
   twitter: { card: "summary_large_image", title: site.title, description: site.description },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },

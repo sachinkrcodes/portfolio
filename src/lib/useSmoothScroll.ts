@@ -6,14 +6,18 @@ import { useStore } from "@/store/useStore";
 
 /**
  * Smooth scrolling with Lenis. It is switched off for visitors who ask their system for less motion,
- * and it never touches touch scrolling (phones keep their native, already smooth, scrolling).
+ * and on touch screens (phones, tablets): Lenis listens to touch events in a way that can hold up the browser's own scrolling,
+ * and the native touch scrolling is already smooth and runs off the main thread.
  */
+
+/** A finger is the main pointer: leave scrolling to the browser. */
+const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 
 /** The 2D page: smooth wheel scrolling for the window, and in-page links (#about ...) glide to their section. */
 export function usePageScroll(offset = -88): RefObject<Lenis | null> {
   const ref = useRef<Lenis | null>(null);
   useEffect(() => {
-    if (useStore.getState().reducedMotion) return;
+    if (useStore.getState().reducedMotion || isTouch()) return;
     const lenis = new Lenis({ autoRaf: true, lerp: 0.1, smoothWheel: true });
     ref.current = lenis;
 
@@ -69,7 +73,7 @@ export function usePanelScroll(wrapper: RefObject<HTMLElement | null>, content: 
   useEffect(() => {
     const w = wrapper.current;
     const c = content.current;
-    if (!active || !w || !c || useStore.getState().reducedMotion) return;
+    if (!active || !w || !c || useStore.getState().reducedMotion || isTouch()) return;
     const lenis = new Lenis({ wrapper: w, content: c, eventsTarget: w, autoRaf: true, lerp: 0.12, smoothWheel: true });
     ref.current = lenis;
     return () => {

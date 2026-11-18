@@ -1,19 +1,24 @@
 import {
   about,
   certifications,
+  cloudWork,
+  deployments,
   education,
+  inProgress,
   islandOrder,
   islands,
   jobs,
   learning,
   miniProjects,
+  moreSkills,
   profile,
   projectLinks,
   projects,
   research,
   sigmax,
   site,
-  skills,
+  skillTracks,
+  skillsIntro,
 } from "@/data/content";
 import { siteUrl } from "@/lib/site";
 
@@ -36,7 +41,7 @@ export default function SemanticMirror() {
     sameAs: [profile.linkedin, profile.github],
     address: { "@type": "PostalAddress", addressLocality: profile.location.city, addressRegion: profile.location.region, addressCountry: "IN" },
     alumniOf: education.map((e) => ({ "@type": "CollegeOrUniversity", name: e.school })),
-    knowsAbout: [...profile.stack, "MySQL", "Spring Security", "REST APIs", "Cloud Computing"],
+    knowsAbout: [...profile.stack, "Spring Boot", "FastAPI", "RAG", "REST APIs", "GitHub Actions", "Cloud Computing"],
   };
   // a person and the website that is about them, as one linked graph (this is what search engines read)
   const graph = {
@@ -74,8 +79,16 @@ export default function SemanticMirror() {
 
       <section aria-labelledby="m-about">
         <h2 id="m-about">About: {about.title}</h2>
-        {about.story.map((p) => (
-          <p key={p}>{p}</p>
+        <p>{about.intro}</p>
+        {about.groups.map((g) => (
+          <div key={g.title}>
+            <h3>{g.title}</h3>
+            <ul>
+              {g.items.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </div>
         ))}
         <ul>
           {about.facts.map((f) => (
@@ -92,12 +105,16 @@ export default function SemanticMirror() {
           <h2 id={`m-${id}`}>{islands[id].title}</h2>
           <p>{islands[id].blurb}</p>
 
+          {id === "projects" && <h3>Major projects</h3>}
           {id === "projects" && (
             <ul>
               {projects.map((p) => (
                 <li key={p.id}>
-                  <h3>{p.name}</h3>
-                  <p>{p.kind}</p>
+                  <h4>{p.name}</h4>
+                  <p>
+                    {p.kind}. {p.status === "building" ? "In progress" : "Completed"}
+                    {p.when ? `, ${p.when}` : ""}.
+                  </p>
                   <p>{p.summary}</p>
                   <ul>
                     {p.stats.map((s) => (
@@ -106,15 +123,25 @@ export default function SemanticMirror() {
                       </li>
                     ))}
                   </ul>
-                  <h4>Problem</h4>
+                  {p.shots && p.shots.length > 0 && (
+                    <>
+                      <h5>Screenshots</h5>
+                      <ul>
+                        {p.shots.map((s) => (
+                          <li key={s.src}>{s.caption}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  <h5>Problem</h5>
                   <p>{p.problem}</p>
-                  <h4>What I built</h4>
+                  <h5>What I built</h5>
                   <ul>
                     {p.built.map((b) => (
                       <li key={b}>{b}</li>
                     ))}
                   </ul>
-                  <h4>Tech</h4>
+                  <h5>Tech</h5>
                   <ul>
                     {p.tech.map((g) => (
                       <li key={g.group}>
@@ -122,13 +149,21 @@ export default function SemanticMirror() {
                       </li>
                     ))}
                   </ul>
-                  <h4>Highlights</h4>
+                  <h5>Highlights</h5>
                   <ul>
                     {p.highlights.map((h) => (
                       <li key={h}>{h}</li>
                     ))}
                   </ul>
-                  <h4>Links</h4>
+                  {(p.progress || p.next) && (
+                    <>
+                      <h5>Where it stands</h5>
+                      {p.progress && <p>Works today: {p.progress}</p>}
+                      {p.next && <p>Still to do: {p.next}</p>}
+                    </>
+                  )}
+                  <h5>Links</h5>
+                  {p.liveNote && !p.liveUrl && <p>{p.liveNote}</p>}
                   <ul>
                     {projectLinks(p).map((l) => (
                       <li key={l.label}>
@@ -145,19 +180,22 @@ export default function SemanticMirror() {
 
           {id === "projects" && miniProjects.length > 0 && (
             <>
-              <h3>More projects</h3>
+              <h3>Minor projects</h3>
               <ul>
                 {miniProjects.map((m) => (
                   <li key={m.id}>
                     <h4>{m.name}</h4>
                     <p>
-                      {m.kind}. {m.summary}
+                      {m.kind}. {m.status === "building" ? "In progress" : "Completed"}
+                      {m.when ? `, ${m.when}` : ""}. {m.summary}
                     </p>
                     <ul>
                       {m.points.map((t) => (
                         <li key={t}>{t}</li>
                       ))}
                     </ul>
+                    {m.progress && <p>Works today: {m.progress}</p>}
+                    {m.next && <p>Still to do: {m.next}</p>}
                     <p>Tech: {m.stack.join(", ")}.</p>
                     <ul>
                       {projectLinks(m).map((l) => (
@@ -216,14 +254,76 @@ export default function SemanticMirror() {
             </ul>
           )}
 
-          {id === "building" && <p>Currently learning: {learning.join(", ")}.</p>}
+          {id === "building" && (
+            <>
+              {inProgress.length > 0 && (
+                <>
+                  <h3>In progress</h3>
+                  <ul>
+                    {inProgress.map((p) => (
+                      <li key={p.id}>
+                        <h4>{p.name}</h4>
+                        <p>
+                          In progress{p.when ? `, ${p.when}` : ""}. Tech: {p.stack.join(", ")}.
+                        </p>
+                        {p.progress && <p>Works today: {p.progress}</p>}
+                        {p.next && <p>Still to do: {p.next}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {deployments.length > 0 && (
+                <>
+                  <h3>Where my apps run</h3>
+                  <ul>
+                    {deployments.map((d) => (
+                      <li key={d.id}>
+                        {d.name}: {d.runsOn}.{" "}
+                        {d.liveUrl && (
+                          <a tabIndex={-1} href={d.liveUrl}>
+                            Live demo
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <h3>Cloud and DevOps work</h3>
+              <ul>
+                {cloudWork.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+              <p>Learning now: {learning.join(", ")}.</p>
+              <p>
+                {sigmax.title}, {sigmax.issuer} ({sigmax.when}). Covers {sigmax.covers}.
+                {sigmax.programProjects.length > 0 && ` Program projects due ${sigmax.projectsDue}: ${sigmax.programProjects.join(", ")}.`}
+              </p>
+            </>
+          )}
         </section>
       ))}
 
       <section aria-labelledby="m-skills">
         <h2 id="m-skills">Skills</h2>
+        <p>{skillsIntro}</p>
+        {skillTracks.map((t) => (
+          <div key={t.title}>
+            <h3>{t.title}</h3>
+            <ul>
+              {t.items.map((i) => (
+                <li key={i.name}>
+                  {i.name}: {i.level === "used" ? "used" : "learning"}
+                  {i.where ? ` (${i.where})` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
         <ul>
-          {skills.map((g) => (
+          {moreSkills.map((g) => (
             <li key={g.group}>
               {g.group}: {g.items.join(", ")}
             </li>
@@ -243,7 +343,7 @@ export default function SemanticMirror() {
         <ul>
           <li>
             {sigmax.title}, {sigmax.issuer} ({sigmax.when}, {sigmax.status.toLowerCase()}). Covers {sigmax.covers}.
-            {sigmax.plannedProjects.length > 0 && ` Planned program projects, due ${sigmax.projectsDue}: ${sigmax.plannedProjects.join(", ")}.`}
+            {sigmax.programProjects.length > 0 && ` Program projects due ${sigmax.projectsDue}: ${sigmax.programProjects.join(", ")}.`}
           </li>
           {certifications.map((c) => (
             <li key={c.name}>

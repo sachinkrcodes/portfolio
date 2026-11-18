@@ -3,10 +3,10 @@ import type { IslandId } from "@/data/content";
 
 export type Mode = "loading" | "hero" | "explore" | "focus";
 /** Places the panel can open on without an island: the whole city stays in view and the panel opens beside it. */
-export type WidePlaceId = "about" | "contact";
-/** A place the panel can open on: one of the four islands, "about" or "contact". */
+export type WidePlaceId = "about" | "skills" | "contact";
+/** A place the panel can open on: one of the four islands, "about", "skills" or "contact". */
 export type PlaceId = IslandId | WidePlaceId;
-export const isWidePlace = (id: PlaceId): id is WidePlaceId => id === "about" || id === "contact";
+export const isWidePlace = (id: PlaceId): id is WidePlaceId => id === "about" || id === "skills" || id === "contact";
 export interface Target {
   island: PlaceId;
   /** Optional sub target inside an island, e.g. one project on the projects island. */
@@ -20,6 +20,8 @@ interface State {
   lite: boolean | null;
   reducedMotion: boolean;
   coarse: boolean;
+  /** this browser can run the 3D city */
+  webgl2: boolean;
   /** 3D scene has compiled and rendered its first frames */
   ready: boolean;
   /** loader wipe has started: the camera may start moving in */
@@ -35,7 +37,7 @@ interface State {
   res: number;
   autoPerf: boolean;
 
-  init: (o: { lite: boolean; reducedMotion: boolean; coarse: boolean; autoPerf: boolean; perf: 0 | 1 | 2 }) => void;
+  init: (o: { lite: boolean; reducedMotion: boolean; coarse: boolean; webgl2: boolean; autoPerf: boolean; perf: 0 | 1 | 2 }) => void;
   setLite: (v: boolean) => void;
   setReady: () => void;
   beginReveal: () => void;
@@ -53,6 +55,7 @@ export const useStore = create<State>((set, get) => ({
   lite: null,
   reducedMotion: false,
   coarse: false,
+  webgl2: false,
   ready: false,
   revealed: false,
   uiReady: false,
@@ -63,7 +66,7 @@ export const useStore = create<State>((set, get) => ({
   res: 1,
   autoPerf: true,
 
-  init: ({ lite, reducedMotion, coarse, autoPerf, perf }) => set({ lite, reducedMotion, coarse, autoPerf, perf, ready: lite ? true : get().ready }),
+  init: ({ lite, reducedMotion, coarse, webgl2, autoPerf, perf }) => set({ lite, reducedMotion, coarse, webgl2, autoPerf, perf, ready: lite ? true : get().ready }),
   setLite: (v) =>
     set({
       lite: v,

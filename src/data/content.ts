@@ -1,27 +1,27 @@
 /**
  * ALL SITE CONTENT LIVES HERE.
  * Edit this one file and every part of the site (3D scene labels, panels, the 2D page, SEO text) updates.
- * Sources: Sachin's resume v7C and the code and READMEs of his GitHub repos (the case study numbers are counted
- * from the code). Nothing here is invented: numbers, dates and issuers come from those.
+ * Sources: Sachin's resume (v10) and the READMEs, code and tests of his GitHub repos. The numbers are the ones printed
+ * in those READMEs or counted from the code. Nothing here is invented.
  *
  * QUICK RECIPES (more in docs/GUIDE.md, "Change the words"):
- *   new full case study        -> add an object to `projects` (it works everywhere, no other file needs a change)
- *   small / mini project       -> add an object to `miniProjects`
- *   a SigmaX project is done   -> delete its name from `sigmax.plannedProjects`, add it to `miniProjects` or `projects`
- *   new job or new title       -> `jobs` (newest first) and `profile.role`
- *   new certificate            -> `certifications`
- *   new resume PDF             -> replace public/Sachin_Kumar_Resume.pdf (same file name)
- * Counts on the site (projects on GitHub, case study count) are calculated from these lists, so they update by themselves.
+ *   new major project            -> add an object to `projects` (it works everywhere, no other file needs a change)
+ *   new minor project            -> add an object to `miniProjects`
+ *   project is still being built -> set `status: "building"`, `when: "Started Nov 2026"`, and fill `progress` and `next`.
+ *                                   It then shows under "In progress" in the Cloud Lab by itself.
+ *   project is finished          -> change `status` to "done", change `when` to "Built ...", delete `progress` and `next`
+ *   project runs online          -> add `liveUrl` and `runsOn` (one line, for example "Vercel and Neon").
+ *                                   It then shows under "Where my apps run" in the Cloud Lab.
+ *   a skill                      -> add a row to `skillTracks` ("used" or "learning", and the project that proves it)
+ *   screenshots                  -> put the pictures in public/projects/<project id>/ and list them in `shots`
+ *   a SigmaX project is built    -> delete its name from `sigmax.programProjects`, add it to `miniProjects` or `projects`
+ *   new job or new title         -> `jobs` (newest first) and `profile.role`
+ *   new certificate              -> `certifications`
+ *   new resume PDF               -> replace public/Sachin_Kumar_Resume.pdf (same file name)
+ * Counts on the site (projects on GitHub, project counts) are calculated from these lists, so they update by themselves.
  *
- * AFTER SIGMAX (major projects only, a new About): the whole change is in this file, about 15 minutes.
- *   1. `projects`      add each major project as a full case study (copy one). The 3D Projects island builds itself
- *                      from this list and has room for 6 buildings; any further project still shows everywhere else.
- *   2. `miniProjects`  set it to [] (an empty list hides the "More projects" parts by itself) or keep the ones you like.
- *   3. `about`         replace the whole object: `title`, `story` (3 short paragraphs) and `facts` (4 tiles).
- *   4. `sigmax`        set `status` to "Completed", and `plannedProjects` to [] (the planned list then disappears).
- *   5. `milestones`, `learning`, `skills`, `profile.summary`, `site.description`   update the words that mention
- *                      what you are learning. `profile.role` / `profile.headline` change if your title does.
- *   6. public/Sachin_Kumar_Resume.pdf   replace with the new resume (same file name).
+ * AFTER SIGMAX: add the major projects to `projects`, rewrite `about`, set `sigmax.status` to "Completed" and
+ * `sigmax.programProjects` to [], then update `learning`, `skillTracks` and the resume PDF. About 15 minutes.
  * The build checks this file for mistakes, so a slip stops the build with a plain message instead of going live.
  */
 
@@ -31,10 +31,11 @@ export const profile = {
   name: "Sachin Kumar",
   role: "Software Engineer and Cloud Engineer",
   level: "Entry-Level",
-  stack: ["Java", "Spring Boot", "Docker"],
-  headline: "I build secure, cloud-ready Java backends.",
+  // The hero shows all of these. The share picture shows the first four.
+  stack: ["Java", "Python", "React", "Node.js", "PostgreSQL", "Docker"],
+  headline: "I build full stack apps and deploy them to the cloud.",
   summary:
-    "MCA (Cloud Computing) student with 2+ years in ERP (SAP HANA, Focus 9) and IT support. Builds Java backend projects with Spring Boot, MySQL, Spring Security and Docker.",
+    "MCA (Cloud Computing) student. I build full stack and AI apps with Java, Python, React, Node.js and PostgreSQL, test them, and deploy them with Docker, GitHub Actions and Vercel. 2+ years in ERP (SAP HANA, Focus 9) and IT support.",
   email: "sachinkrcodes@gmail.com",
   linkedin: "https://www.linkedin.com/in/sachinkrcodes",
   github: "https://github.com/sachinkrcodes",
@@ -45,12 +46,13 @@ export const profile = {
 
 /** Text for the bottom ticker. Keep these true; they are shown to recruiters. */
 export const milestones = [
-  // The Railway config is in the repo, but a public Railway URL is not, so this says only what can be checked.
-  "Blood Bank Finder: Spring Boot, Spring Security and Docker",
-  "Attendly: Node.js app with email-verified login, admin and a database",
-  "Tic-Tac-Toe with an unbeatable Minimax AI",
-  "MCA Cloud Computing at Parul University",
+  "Sovereign AI Workbench: Python, FastAPI, React, local AI model, 144 tests",
+  "Attendly: Node.js and PostgreSQL, 76 API endpoints, 73 end-to-end checks",
+  "Blood Bank Finder: React, Supabase and a live map",
+  "Suzuki-Kasami Simulator: Java and web, 2 algorithms compared",
+  "SigmaX in progress: DSA in Java, MERN, AI integration, DevOps",
   "Learning AWS and Kubernetes",
+  "MCA Cloud Computing at Parul University",
   profile.openTo,
 ];
 
@@ -66,7 +68,7 @@ export interface CaseStudy {
   built: string[];
   /** tech, grouped */
   tech: { group: string; items: string[] }[];
-  /** proof points: tests, checks, how it ships */
+  /** proof points: tests, checks, how it ships, honest limits */
   highlights: string[];
 }
 
@@ -82,137 +84,276 @@ export interface Linkable {
   liveUrl?: string;
   /** Text of that button when "Live demo" is not accurate (for example "Live demo (sample data)"). */
   liveLabel?: string;
+  /** One short line shown above the links when there is no live demo (for example "Not deployed. It runs on my laptop."). */
+  liveNote?: string;
   /** Any extra links (for example the backend folder). */
   links?: LinkItem[];
+  /** One short line: where it runs online (for example "Vercel and Neon"). It shows under "Where my apps run" in the Cloud Lab. */
+  runsOn?: string;
 }
 
-export interface Project extends CaseStudy, Linkable {
+/** Where a project stands. Projects with status "building" also appear under "In progress" in the Cloud Lab. */
+export interface Progress {
+  /** "done" (default, shows a "Completed" chip) or "building" (shows an "In progress" chip and a place in the Cloud Lab) */
+  status?: "done" | "building";
+  /** "Started Nov 2026" for a project in progress, "Built Sep 2026" for a finished one */
+  when?: string;
+  /** one line, for projects in progress: what already works */
+  progress?: string;
+  /** one line, for projects in progress: what is left */
+  next?: string;
+}
+
+/** One screenshot. `src` is a file under public/ (the build stops if it is missing). The caption says what the picture shows. */
+export interface Shot {
+  src: string;
+  caption: string;
+}
+
+export interface Project extends CaseStudy, Linkable, Progress {
   id: string;
   name: string;
   /** short list for chips and search text */
   stack: string[];
   summary: string;
+  /** 3 screenshots of the project running (public/projects/<id>/...) */
+  shots?: Shot[];
   /**
    * The look of this project's building on the 3D Projects island. Optional: new projects get one of the three
-   * styles in turn. The first three projects (Blood Bank Finder, Sentiment Analysis, Suzuki-Kasami) keep their own buildings.
+   * styles in turn. Blood Bank Finder, Sentiment Analysis and Suzuki-Kasami keep their own buildings.
    *   "pipeline" = a build, test and ship line   "dish" = a satellite dish with radar pulses   "tiers" = a stack of layers with an orb
    */
   building?: "pipeline" | "dish" | "tiers";
 }
 
+/**
+ * Major projects, best first. This order is used by the 3D island, the previous and next buttons and the 2D page.
+ * The 3D island has room for 6 buildings.
+ */
 export const projects: Project[] = [
   {
-    id: "blood-bank-finder",
-    name: "Blood Bank Finder",
-    kind: "Spring Boot web app and REST API",
-    stack: ["Java 21", "Spring Boot", "MySQL", "Docker"],
-    summary: "Spring Boot app that matches blood donors with requests, secured with Spring Security, with a REST API and a web app for donors and admins.",
+    id: "sovereign-ai-workbench",
+    name: "Sovereign AI Workbench",
+    kind: "AI document Q&A that runs on your own computer",
+    status: "done",
+    when: "Built Nov 2026",
+    stack: ["Python", "FastAPI", "React", "Ollama", "RAG"],
+    summary:
+      "Upload PDF, Word or text files, ask a question, and get an answer with the file name and page numbers. The language model runs on the laptop through Ollama, so no document text goes to an online AI service.",
     stats: [
-      { value: "10", label: "REST endpoints" },
-      { value: "23", label: "web routes" },
-      { value: "7", label: "JPA entities" },
-      { value: "8", label: "blood groups matched" },
+      { value: "144", label: "automated tests" },
+      { value: "30", label: "API endpoints" },
+      { value: "20 of 20", label: "test questions: right file and page first" },
+      { value: "3", label: "agents with their own tools" },
     ],
     problem:
-      "When someone needs blood urgently, the match has to be right the first time: the right blood group, the right city, and a donor who is allowed to give again. Donor details are personal data and the admin tools control stock, so the system also has to be strict about who can see and do what.",
+      "Some teams cannot send confidential files to an online AI service, but they still need answers from those files. This app answers from files that stay on the computer, shows the exact source page, and keeps a log of who did what.",
     built: [
-      "A Spring Boot backend with two front doors: a REST API with Swagger docs, and a server-rendered Thymeleaf web app for donors and admins.",
-      "Donor registration and search by blood group and city. Anyone who gave blood less than 90 days ago is filtered out automatically.",
-      "Emergency blood requests that find eligible donors using blood group compatibility across all 8 groups.",
-      "Blood bank stock management and an admin dashboard to view and close open requests. It also shows plain threshold warnings (low stock, units about to expire, open requests with no eligible donor). They are rules, not an AI model, so every warning can be explained.",
-      "Two login paths on purpose: form login with BCrypt passwords and donor and admin roles for the browser, and a secret token header for the raw admin REST endpoints.",
-      "CAPTCHA, and per-IP rate limiting on the sign-up and request endpoints (5 POSTs per 10 minutes).",
-      "A hospital and blood bank map (Leaflet and OpenStreetMap) with markers that refresh on a timer and a locate-me button, a blood camps page, and English and Hindi text (75 message keys each).",
+      "A FastAPI backend with 30 API endpoints and a React 18 and Vite web app. Files are uploaded, split into passages and indexed.",
+      "Hybrid search: BM25 keyword ranking and vector similarity joined with reciprocal rank fusion. Keyword search still works when Ollama is off.",
+      "Llama 3.2 3B and the nomic-embed-text model run on the laptop through Ollama. Every answer shows file names and page numbers. Citations that point to passages the app did not retrieve are removed, and a caution note shows when the model cites no source.",
+      "3 agents, each with its own tool list and step limit: Librarian (lists the documents), Researcher (searches and answers with citations) and Analyst (reads whole documents, compares them and does calculations).",
+      "3 roles (viewer, analyst, admin), a first-run screen that creates the admin account, and an audit log where each row holds the hash of the previous row. A verify endpoint reports the first edited or deleted row.",
+      "A Load sample documents button that uploads and indexes 3 fictional PDFs, so the app can be tried in a minute.",
     ],
     tech: [
-      { group: "Language and framework", items: ["Java 21", "Spring Boot 3", "Spring MVC"] },
-      { group: "Data", items: ["Spring Data JPA", "Hibernate", "MySQL"] },
-      { group: "Security", items: ["Spring Security", "BCrypt", "CAPTCHA", "Rate limiting"] },
-      { group: "Front end", items: ["Thymeleaf", "Leaflet", "JavaScript", "HTML and CSS"] },
-      { group: "Testing and docs", items: ["JUnit", "Mockito", "Swagger UI", "Postman collection"] },
-      { group: "Delivery", items: ["Docker (multi-stage)", "Spring Boot Actuator", "Railway config"] },
+      { group: "Backend", items: ["Python", "FastAPI", "SQLAlchemy", "SQLite (Postgres also works)", "NumPy"] },
+      { group: "AI", items: ["Ollama", "Llama 3.2 3B", "nomic-embed-text", "RAG", "BM25", "Vector search", "Reciprocal rank fusion"] },
+      { group: "Front end", items: ["React 18", "Vite"] },
+      { group: "Testing and delivery", items: ["pytest", "GitHub Actions", "Docker", "Docker Compose"] },
     ],
     highlights: [
-      "4 automated tests: JUnit and Mockito tests for the 90-day rule (recent donor excluded, donor past the gap included, first-time donor included) and a Spring context test that fails if the security wiring breaks.",
-      "The donation gap is one setting (90 days by default), so changing the rule does not mean changing code.",
-      "Multi-stage Docker build, and a Railway config that health-checks the app through Spring Boot Actuator.",
-      "A Postman collection is included for trying the REST API.",
+      "144 pytest tests, all passing in 11.97 s (Windows 11, Python 3.13). GitHub Actions runs them, the web build and the Docker image builds on every push.",
+      "Retrieval check on 20 sample questions about 2 fictional documents (5 passages): the right file and page ranked first for 20 of 20.",
+      "Answer check with Llama 3.2 3B on the same questions: 20 of 20 correct with at least one citation, and 2 of 2 out-of-scope questions refused. Median 8.9 s per answer (slowest 10.9 s) on one laptop.",
+      "Limits are listed in the README: scanned PDFs are rejected (no OCR), it is not deployed, the 20-question check is small, and the Researcher agent returned a raw tool call once during testing.",
     ],
-    repo: "https://github.com/sachinkrcodes/blood-bank-finder",
-    // No live link on purpose: since the Nov 9 commit "Restore full Spring Boot app at repo root" the repo is only the Java app,
-    // which needs MySQL and a Java host (the Railway steps are in its README), so the old Vercel demo is gone.
-    // When it runs somewhere public, open it in a private window first, then add two lines here:
-    //   liveUrl: "https://your-link",
-    //   liveLabel: "Live app",
+    repo: "https://github.com/sachinkrcodes/sovereign-ai-workbench",
+    liveNote: "Not deployed. It runs on my laptop; the README has the run steps.",
+    building: "tiers",
+    shots: [
+      { src: "/projects/sovereign-ai-workbench/ask-page.jpg", caption: "Ask page with example questions for the sample documents." },
+      { src: "/projects/sovereign-ai-workbench/admin-audit-log.jpg", caption: "Admin page with usage numbers and the audit log check." },
+      { src: "/projects/sovereign-ai-workbench/agents.jpg", caption: "Agents page after a Researcher run where the model returned a raw tool call instead of an answer." },
+    ],
+  },
+  {
+    id: "attendly",
+    name: "Attendly",
+    kind: "College attendance app: Node.js, PostgreSQL, installable web app",
+    status: "done",
+    when: "Built Oct to Nov 2026",
+    stack: ["Node.js", "PostgreSQL", "JavaScript", "REST API", "PWA", "Vercel"],
+    summary:
+      "Attendance for colleges in one installable web app: teachers take attendance, students check in with a live 6-digit code, and admins manage colleges. A Node.js API on Vercel and PostgreSQL on Neon.",
+    stats: [
+      { value: "76", label: "API endpoints" },
+      { value: "19", label: "database tables" },
+      { value: "73", label: "end-to-end API checks" },
+      { value: "4", label: "roles" },
+    ],
+    problem:
+      "Teachers need a fast way to take attendance, students need to see where they stand, and a college needs approved teachers and old records that nobody can quietly change. Attendly does this from one app that installs on a phone.",
+    built: [
+      "Teacher and student portals: classes with a join code, attendance marked Present, Late, Absent or Leave, and a planner that tells a student how many classes they can still miss.",
+      "A live check-in code: the teacher shows a 6-digit code, students type it on their phone, and it expires after 5 to 30 minutes.",
+      "Leave requests, gate pass, class notices, timetable, exams with marks and a help desk, all on one home screen.",
+      "4 roles: student, teacher, HOD and platform admin. Teachers need approval, students join only their own college, and old attendance is locked until the HOD allows edits.",
+      "A Node.js API of 76 endpoints on Vercel serverless functions, with 19 tables on PostgreSQL (Neon). The browser app is plain HTML, CSS and JavaScript and installs on a phone as a PWA.",
+    ],
+    tech: [
+      { group: "Backend", items: ["Node.js", "REST API", "Vercel serverless functions"] },
+      { group: "Data", items: ["PostgreSQL", "Neon"] },
+      { group: "Security", items: ["E-mail OTP", "scrypt password hashing", "Account lock", "Signed sessions", "Security headers"] },
+      { group: "Front end", items: ["HTML", "CSS", "JavaScript", "PWA"] },
+    ],
+    highlights: [
+      "73 end-to-end API checks pass.",
+      "620 screens checked at widths from 320 to 1280 px.",
+      "Accounts are secured with e-mail OTP, scrypt password hashing, an account lock after 5 wrong passwords, signed sessions and strict security headers.",
+      "Limits are listed in the README: no SMS OTP (SMS needs a paid provider), no fees or transport pass, no load test, and the front end is one big JavaScript file of about 1,300 lines.",
+    ],
+    repo: "https://github.com/sachinkrcodes/Attendance-system",
+    liveUrl: "https://attendly-attende.vercel.app",
+    runsOn: "Vercel (site and API) and Neon (PostgreSQL)",
+    building: "dish",
+    shots: [
+      { src: "/projects/attendly/student-home.jpg", caption: "Student home with attendance ring and join box." },
+      { src: "/projects/attendly/check-in.jpg", caption: "Check-in screen where a student types the 6-digit code." },
+      { src: "/projects/attendly/teacher-home.jpg", caption: "Teacher home with attendance ring and trend." },
+    ],
+  },
+  {
+    // Keeps the id "blood-bank-finder" (old share links and the 3D building follow it). The repo is the live version.
+    id: "blood-bank-finder",
+    name: "Blood Bank Finder",
+    kind: "Live map web app: React, TypeScript, Supabase",
+    status: "done",
+    when: "Built Nov 2026",
+    stack: ["React", "TypeScript", "Vite", "Supabase", "PostgreSQL", "Leaflet", "Vercel"],
+    summary:
+      "Find blood banks and hospitals on a live map, check blood stock, and post urgent blood requests that matching donors can answer. React and TypeScript on Supabase (PostgreSQL), live on Vercel. The first version was Spring Boot, MySQL and Docker.",
+    stats: [
+      { value: "11", label: "tables locked with Row Level Security" },
+      { value: "15 min", label: "map data cache per area" },
+      { value: "90 days", label: "donor wait before helping again" },
+      { value: "2", label: "Vercel serverless functions" },
+    ],
+    problem:
+      "When someone needs blood urgently, calling around is slow. A person should see nearby blood banks and hospitals on a map, see which blood groups are in stock, and send a request that reaches matching donors, without their phone number going to everyone.",
+    built: [
+      "A live map of hospitals and blood banks from OpenStreetMap, loaded through a Vercel function that caches each area for 15 minutes.",
+      "Partner accounts: a blood bank registers, an admin verifies it, then it publishes stock per blood group with the time of the last update.",
+      "Data locked with Row Level Security on 11 tables. The requester's phone is shown only to a logged-in, compatible donor who waited 90 days since the last donation and agrees to help.",
+      "A shortage forecast (units in stock divided by average units requested per day over 30 days) and an assistant that uses Anthropic or Gemini, or a built-in rule engine when no key is set.",
+    ],
+    tech: [
+      { group: "Front end", items: ["React 18", "TypeScript", "Vite", "Leaflet", "OpenStreetMap"] },
+      { group: "Backend and data", items: ["Supabase", "PostgreSQL", "Supabase Auth", "Row Level Security", "SQL functions"] },
+      { group: "Serverless", items: ["Vercel serverless functions", "Anthropic and Gemini assistant (optional)"] },
+      { group: "First version", items: ["Java 21", "Spring Boot", "MySQL", "Docker"] },
+    ],
+    highlights: [
+      "Vercel cannot run the first Spring Boot version, so its logic moved into database functions on Supabase.",
+      "No secret key reaches the browser: the hospital data and the assistant go through Vercel functions.",
+      "Limits are listed in the README: no real blood bank has joined yet, stock is updated by hand and the page refreshes every 30 seconds, and there is no legal or security review yet.",
+    ],
+    repo: "https://github.com/sachinkrcodes/blood-bank-finder-live",
+    liveUrl: "https://blood-bank-live.vercel.app",
+    runsOn: "Vercel (site and 2 functions) and Supabase (PostgreSQL, Auth)",
+    shots: [
+      { src: "/projects/blood-bank-finder/live-map.jpg", caption: "Live map with a partner blood bank selected." },
+      { src: "/projects/blood-bank-finder/find-results.jpg", caption: "Find blood result with stock per group." },
+      { src: "/projects/blood-bank-finder/request-form.jpg", caption: "Post a blood request form." },
+    ],
+  },
+  {
+    id: "suzuki-kasami-simulator",
+    name: "Suzuki-Kasami Simulator",
+    kind: "Distributed computing simulator: Java Swing and web",
+    status: "done",
+    when: "Built Sep to Nov 2026",
+    stack: ["Java", "Swing", "JavaScript", "Suzuki-Kasami", "Ricart-Agrawala"],
+    summary:
+      "Simulator of distributed mutual exclusion in two versions: a Java Swing desktop app (Suzuki-Kasami) and a web version that runs Suzuki-Kasami and Ricart-Agrawala, with fault injection and a Compare page.",
+    stats: [
+      { value: "2 to 10", label: "processes" },
+      { value: "2", label: "algorithms compared" },
+      { value: "640", label: "random test runs (400 Java, 240 JavaScript)" },
+      { value: "9.78 vs 18", label: "messages per entry at N = 10" },
+    ],
+    problem:
+      "In a distributed system there is no shared memory and no global clock, yet several processes must never use a shared resource at the same time. Suzuki-Kasami solves this with a single token: only the process holding it may enter the critical section. I built simulators where you can step through the algorithm, break it on purpose and watch what happens.",
+    built: [
+      "A Java Swing desktop app that animates processes, messages and the token on one virtual clock. The algorithm sits in one Simulation class and the windows only draw it.",
+      "A plain JavaScript web version that runs in any browser, phone included, with both algorithms for 2 to 10 processes: play, pause, step, step back, and panels for the token, request numbers, queue, timeline and a safety monitor.",
+      "Fault injection: lose any message (by click, at random, or the next one) and crash or restart a process. The page shows a lost token or a blocked process.",
+      "A Compare page: both algorithms, same settings, 30 seeds for each N from 2 to 10. At N = 10 under light load Ricart-Agrawala sends 18 messages per entry and Suzuki-Kasami 9.78.",
+    ],
+    tech: [
+      { group: "Languages", items: ["Java 17", "Swing (custom painting)", "JavaScript", "HTML", "CSS", "Canvas"] },
+      { group: "Simulation", items: ["Discrete-event engine", "One virtual clock", "Seeded random generator", "Fault injection"] },
+      { group: "Algorithms", items: ["Suzuki-Kasami", "Ricart-Agrawala"] },
+      { group: "Delivery", items: ["GitHub Actions CI", "Vercel"] },
+    ],
+    highlights: [
+      "Self tests: 400 random runs in Java (about 1.2 million events) and 240 in JavaScript (168,000 events). The Java test checks after every event that exactly one token exists and at most one process is in the critical section.",
+      "A seeded random generator means any run can be repeated exactly.",
+      "No external libraries in the Java app: the windows and charts are drawn by hand.",
+      "Limits are listed in the README: it is a simulation on one computer with a virtual clock, and it has no recovery (no timeouts, no token regeneration), so it shows the failure and stops there.",
+    ],
+    repo: "https://github.com/sachinkrcodes/suzuki-kasami-simulator",
+    liveUrl: "https://suzuki-kasami-simulator.vercel.app",
+    runsOn: "Vercel (web version)",
+    shots: [
+      { src: "/projects/suzuki-kasami-simulator/simulate.jpg", caption: "Suzuki-Kasami with six processes, the token travelling." },
+      { src: "/projects/suzuki-kasami-simulator/token-lost.jpg", caption: "Token lost after its holder crashed." },
+      { src: "/projects/suzuki-kasami-simulator/compare.jpg", caption: "Compare page with two line charts." },
+    ],
   },
   {
     id: "sentiment-analysis-app",
     name: "Sentiment Analysis Web App",
-    kind: "Plain Java web app, Social Media Analytics course",
-    stack: ["Java", "REST API", "Naive Bayes"],
-    summary: "Plain Java backend that scores text sentiment for single inputs, batches and CSV files.",
+    kind: "Plain Java web app: Lexicon and Naive Bayes",
+    status: "done",
+    when: "Built Sep 2026",
+    stack: ["Java", "Naive Bayes", "REST API", "JavaScript"],
+    summary:
+      "Scores any text as positive, neutral or negative with two engines you can switch between, a word-score lexicon and a Naive Bayes model trained inside the app, and shows the results on a live dashboard. Plain Java 17, no libraries.",
     stats: [
-      { value: "16", label: "REST endpoints" },
-      { value: "463", label: "labelled training rows" },
-      { value: "2", label: "analysers to compare" },
-      { value: "4", label: "metrics reported" },
+      { value: "6", label: "pages" },
+      { value: "439", label: "labelled training examples" },
+      { value: "5-fold", label: "cross-validation in Model Lab" },
+      { value: "35", label: "self-tests" },
     ],
     problem:
       "Reading hundreds of comments or reviews one by one to find out whether people are happy or upset does not scale. This app scores text as positive, neutral or negative, and lets you compare two different methods on the same data to see which one is more accurate.",
     built: [
-      "A Java backend with no framework: the JDK's built-in HTTP server exposes 16 REST endpoints for single text, batches, CSV upload, history, the lexicon and model evaluation.",
-      "Two analysers you can switch between: a rule-based lexicon scorer that handles negation, boosters, capital letters and exclamation marks, and a Naive Bayes classifier that trains inside the app.",
-      "Training on a labelled CSV of 463 rows. You can upload your own text and label CSV to retrain.",
-      "A browser dashboard to analyse one text or a whole batch, see totals, a score trend, the sentiment split and top words, search the history and edit the lexicon while the server runs.",
-      "A Model Lab page that tests both analysers on held-out data and shows accuracy, precision, recall, F1 and a confusion matrix.",
+      "Two analyzers you can switch between while the app runs: Lexicon (word scores, negation, boosters, CAPS, \"!\" and \"but\") and Naive Bayes trained from a labelled CSV.",
+      "6 pages: Analyze (highlighted words and a live feed simulator), Batch or CSV, Dashboard, History, Lexicon editor and Model Lab.",
+      "Model Lab: upload a text,label CSV to retrain, then compare both engines with accuracy, precision, recall, F1 and a confusion matrix. It removes repeated rows, keeps every class in the test split and shows a majority-class baseline and 5-fold cross-validation.",
+      "An editable lexicon (change a word score and the next analysis uses it), a light and dark interface, and a read-only mode (READ_ONLY=true) for public demos.",
+      "All in plain Java with no libraries: own HTTP server, own JSON and CSV code, charts drawn on canvas. History and edits are saved as CSV files.",
     ],
     tech: [
-      { group: "Backend", items: ["Java (JDK 17+)", "JDK HTTP server", "REST and JSON"] },
-      { group: "Analysis", items: ["Lexicon rules", "Naive Bayes", "Laplace smoothing"] },
-      { group: "Data", items: ["CSV files for history, lexicon and training data"] },
-      { group: "Front end", items: ["HTML", "JavaScript", "Canvas charts"] },
+      { group: "Backend", items: ["Java 17", "Built-in HTTP server", "REST and JSON"] },
+      { group: "Analysis", items: ["Lexicon rules", "Naive Bayes", "Laplace smoothing", "5-fold cross-validation"] },
+      { group: "Data", items: ["CSV files for lexicon, training set, feed and history"] },
+      { group: "Front end", items: ["HTML", "CSS", "JavaScript", "Canvas charts"] },
+      { group: "Delivery", items: ["Dockerfile", "GitHub Actions CI"] },
     ],
     highlights: [
-      "Everything is saved as plain CSV files, so history and lexicon edits survive a restart.",
-      "A built-in self test checks the lexicon rules, the JSON and CSV round trip, and the Naive Bayes accuracy on held-out data.",
-      "No frameworks: the JSON and CSV helpers and the charts are written by hand.",
-      "The logic sits in one service class, apart from the HTTP layer, so it can be reused under Spring Boot later.",
+      "35 built-in self-tests.",
+      "Everything is saved as CSV files, so history and lexicon edits survive a restart.",
+      "A Dockerfile and a GitHub Actions workflow are in the repo.",
+      "Limit, stated in the README: Naive Bayes scores 100% on its own test split because the bundled training set reuses a small set of sentence patterns. That number does not predict accuracy on real posts.",
     ],
     repo: "https://github.com/sachinkrcodes/sentiment-analysis-app",
-  },
-  {
-    id: "suzuki-kasami-simulator",
-    name: "Suzuki-Kasami Algorithm Simulator",
-    kind: "Java Swing desktop app, Distributed Computing course",
-    stack: ["Java Swing"],
-    summary: "Swing simulator of the Suzuki-Kasami token algorithm for distributed mutual exclusion.",
-    stats: [
-      { value: "2 to 10", label: "processes" },
-      { value: "400", label: "randomized test runs" },
-      { value: "1.2M", label: "events checked, about" },
-      { value: "2", label: "channel modes" },
+    shots: [
+      { src: "/projects/sentiment-analysis-app/analyze.jpg", caption: "Analyze page with a negated text." },
+      { src: "/projects/sentiment-analysis-app/dashboard.jpg", caption: "Dashboard with trend chart and top words." },
+      { src: "/projects/sentiment-analysis-app/model-lab.jpg", caption: "Model Lab with the training dataset." },
     ],
-    problem:
-      "In a distributed system there is no shared memory and no global clock, yet several processes must never use a shared resource at the same time. Suzuki-Kasami solves this with a single token: only the process holding it may enter the critical section. I built a simulator where you can step through the algorithm and watch the token move.",
-    built: [
-      "A Java Swing desktop app that animates processes, messages and the token on one virtual clock.",
-      "The algorithm sits in one Simulation class (request, release, deliver) and the interface only draws it.",
-      "Play, pause, step forward and step back, with speed from 0.25x to 4x.",
-      "Setup for 2 to 10 processes, FIFO or non-FIFO channels, network delay range, random seed and workload. Ready-made scenarios, and save and load for your own.",
-      "Live panels for each process's request numbers, the token and its queue, an event log, a timeline, message counts, waiting times and a safety monitor.",
-    ],
-    tech: [
-      { group: "Language and interface", items: ["Java (JDK 17+)", "Swing"] },
-      { group: "Simulation", items: ["Discrete-event engine", "Virtual clock", "Seeded random generator"] },
-      { group: "Algorithm", items: ["Suzuki-Kasami token-based mutual exclusion"] },
-      { group: "Files", items: ["Saved scenario files"] },
-    ],
-    highlights: [
-      "A self test runs 400 random simulations (2 to 10 processes, FIFO and non-FIFO channels, about 1.2 million events) and checks after every event that exactly one token exists and at most one process is in the critical section.",
-      "The same test checks that step back restores the exact earlier state and that every request is served.",
-      "A seeded random generator means any run can be repeated exactly.",
-    ],
-    repo: "https://github.com/sachinkrcodes/suzuki-kasami-simulator",
   },
 ];
 
@@ -227,95 +368,171 @@ export function projectLinks(p: Linkable): LinkItem[] {
 }
 
 /**
- * Smaller projects: a card each (what it is, 2 to 4 facts counted from the code, links), without a full case study.
- * They show under the case studies in the Projects panel and on the 2D page. To grow one into a full case study,
+ * Minor projects: a card each (what it is, 3 or 4 facts from the README, links), without a full case study.
+ * They show under the major projects in the Projects panel and on the 2D page. To grow one into a major project,
  * move it to `projects` and fill in problem, built, tech and highlights.
- * Work that does not exist yet (the SigmaX projects) is NOT listed here: it stays in `sigmax.plannedProjects`
- * until there is code to show.
+ * Work that does not exist yet (the SigmaX projects) is NOT listed here: it stays in `sigmax.programProjects` until there is code to show.
  */
-export interface MiniProject extends Linkable {
+export interface MiniProject extends Linkable, Progress {
   id: string;
   name: string;
   /** one line: what sort of project this is */
   kind: string;
   summary: string;
-  /** 2 to 4 short facts */
+  /** 1 to 5 short facts */
   points: string[];
   /** short list for chips */
   stack: string[];
-  /** "done" (default) or "building" (shows an "In progress" chip) */
-  status?: "done" | "building";
 }
 
 export const miniProjects: MiniProject[] = [
   {
-    id: "tic-tac-toe",
-    name: "Tic-Tac-Toe with an unbeatable AI",
-    kind: "Mini project: Java Swing app and browser game",
+    id: "birthday-surprise",
+    name: "Birthday Surprise",
+    kind: "Website that makes a private birthday page for each person",
+    status: "done",
+    when: "Built Nov 2026",
     summary:
-      "The same game twice, as a Java Swing desktop app and as a browser game. The AI tries every possible game with Minimax and Alpha-Beta pruning, so on the hardest level the best you can do is a draw.",
+      "A website that makes a private birthday page for each person: 14 animated chapters, photos, music and wishes, with an admin panel to create and edit every page. React and TypeScript on Supabase, live on Vercel.",
     points: [
-      "Play against the computer or a friend, with 3 levels: Easy, Medium and Unbeatable.",
-      "Both versions use the same Minimax logic: 452 lines of Java Swing and 218 lines of JavaScript.",
-      "The browser version keeps the scoreboard in the browser, previews your move on hover, highlights the winning line and works on phones and with the keyboard.",
-      "SharedCounter.java (28 lines) is a small thread-safety demo: two threads update one counter through a synchronized method.",
+      "14 animated chapters (opening, letters, gallery, games, cake, wishes, poems and more) and 15 look packs that change colours and floating decorations.",
+      "Admin panel: one page per person, photo and music upload, a library of ready English lines, and a share panel with a QR code.",
+      "Each page sits behind a hard-to-guess link with an optional PIN, an opening date and an expiry date.",
+      "Admin secured with Supabase login, an authenticator-app two-step code, forgot password and Row Level Security.",
     ],
-    stack: ["Java Swing", "JavaScript", "Minimax", "Alpha-Beta pruning"],
-    repo: "https://github.com/sachinkrcodes/Tic-tac-toe",
-    // Taken from your Vercel project list and NOT checked from here. Open it in a private window; fix or delete if it fails.
-    liveUrl: "https://tic-tac-toe-zeta-one-90.vercel.app",
-    liveLabel: "Play it",
+    stack: ["React", "TypeScript", "Vite", "Framer Motion", "Supabase", "Vercel"],
+    repo: "https://github.com/sachinkrcodes/birthday-surprise",
+    liveUrl: "https://happiiee-bday.vercel.app",
+    runsOn: "Vercel (site) and Supabase (PostgreSQL, Auth, Storage)",
   },
   {
-    id: "attendly",
-    name: "Attendly: attendance and campus app",
-    kind: "Mini project: full-stack web app, Node.js and PostgreSQL",
+    id: "cloud-city-portfolio",
+    name: "The Cloud City portfolio",
+    kind: "This website: a 3D portfolio",
+    status: "done",
+    when: "Built Nov 2026",
     summary:
-      "A classroom attendance app for teachers, students and a platform admin, with email-verified accounts and a database behind it. Plain HTML, CSS and JavaScript in the browser, a Node.js API on Vercel serverless functions, and it installs on a phone like an app.",
+      "The site you are looking at. A 3D city of floating islands, one island for each section, with a fast 2D version for phones and slow computers. All its text comes from one file.",
     points: [
-      "Email-verified accounts: the 6-digit code is stored hashed, expires in 10 minutes and allows 5 tries. Passwords use scrypt, login tokens last 7 days, and an account locks for 15 minutes after 5 wrong passwords.",
-      "Teachers create classes with a join code and take attendance (Present, Late, Absent or Leave). A live check-in code lets students mark themselves present from their phones.",
-      "Leave requests, notices, a timetable, exams and marks, gate passes and a help desk, plus a planner that tells a student how many classes they can still miss. A platform admin adds colleges and approves teachers.",
-      "A REST API of 62 endpoints over 16 tables, on PostgreSQL (Neon) in production and a SQLite file on my own machine. 61 end-to-end API checks pass, including that Late counts as attended and Leave is excused.",
+      "Next.js, React, TypeScript and Three.js (React Three Fiber), with a plain 2D version for phones, low-power devices and browsers without WebGL.",
+      "Every word on the site is in one file (src/data/content.ts). The build stops with a plain message if something in it is wrong, so a broken change never goes live.",
+      "A contact form that sends e-mail through Resend, and a link-preview picture made at build time from the same file.",
     ],
-    stack: ["Node.js", "PostgreSQL", "JavaScript", "REST API", "PWA", "Vercel"],
-    repo: "https://github.com/sachinkrcodes/Attendance-system",
-    // From the earlier README. NOT checked from here (the Vercel link cannot be opened from this workspace), and it may have changed with the new GitHub name.
-    // Accounts now need an email code, so the live app needs a Neon database, AUTH_SECRET, ADMIN_EMAILS and either SMTP_USER and SMTP_PASS or SHOW_OTP=true (demo mode, the code shows on screen).
-    // Open the link in a private window, sign up once, and also open its /api/health page (it should show {"ok":true}). If the link is different or dead, change or delete the next two lines.
-    liveUrl: "https://attendance-system-codeswithsachin.vercel.app",
-    liveLabel: "Live demo",
+    stack: ["Next.js", "React", "TypeScript", "Three.js", "Tailwind CSS", "Vercel"],
+    repo: "https://github.com/sachinkrcodes/portfolio",
+    runsOn: "Vercel",
+  },
+  {
+    id: "tic-tac-toe",
+    name: "Tic-Tac-Toe with a Minimax AI",
+    kind: "The same game as a web page and as a Java Swing app",
+    status: "done",
+    summary:
+      "The same game twice: as a web page and as a Java Swing desktop app. The AI tries every possible game with Minimax and Alpha-Beta pruning, so on the hardest level the best you can do is a draw.",
+    points: [
+      "The web version has 3 levels: Easy (random moves), Medium (random half of the time) and Unbeatable. The Java version has only Unbeatable.",
+      "Play against the computer or a friend, with a score board saved in the browser, a preview of your move on hover and a green line on the winning cells.",
+      "Works on phones and desktop.",
+      "SharedCounter.java is a small thread-safety demo: two threads update one counter through a synchronized method.",
+    ],
+    stack: ["Java Swing", "HTML", "CSS", "JavaScript", "Minimax", "Alpha-Beta pruning"],
+    repo: "https://github.com/sachinkrcodes/Tic-tac-toe",
   },
 ];
 
+/** Every project, big or small, that is still being built. It feeds "In progress" in the Cloud Lab (island 04). Empty when everything is finished. */
+export interface InProgressItem extends Progress, Linkable {
+  id: string;
+  name: string;
+  kind: "project" | "mini";
+  stack: string[];
+}
+export const inProgress: InProgressItem[] = [
+  ...projects.map((p) => ({ ...p, kind: "project" as const })),
+  ...miniProjects.map((m) => ({ ...m, kind: "mini" as const })),
+].filter((p) => p.status === "building");
+
+/** Every project that runs online (it has `runsOn`). It feeds "Where my apps run" in the Cloud Lab. */
+export interface Deployment {
+  id: string;
+  name: string;
+  runsOn: string;
+  liveUrl?: string;
+}
+export const deployments: Deployment[] = [...projects, ...miniProjects]
+  .filter((p) => !!p.runsOn)
+  .map((p) => ({ id: p.id, name: p.name, runsOn: p.runsOn as string, liveUrl: p.liveUrl }));
+
+/** "A, B and C" */
+export function joinList(list: string[]): string {
+  if (list.length <= 1) return list.join("");
+  return `${list.slice(0, -1).join(", ")} and ${list[list.length - 1]}`;
+}
+
 /**
- * The About page: a short story of what I build, what I have checked, and where I come from.
- * Every fact in it is on the resume (v7C) or in a repo, and nothing in it goes out of date by itself
- * (no course dates, no "expected" years). The wording is a draft: change it to sound like you.
+ * The About page: facts a recruiter can scan in a minute. Every line is on the resume or in a README.
  * It is defined after the project lists because the "projects on GitHub" tile is counted from them.
  */
-/** Every "REST endpoints" number in the stats of a Java project, added up. */
-const javaRestEndpoints = projects
-  .filter((p) => /\bJava\b/.test(p.stack.join(" ")))
-  .reduce((sum, p) => sum + p.stats.filter((st) => /REST endpoints?/i.test(st.label)).reduce((a, st) => a + (parseInt(st.value, 10) || 0), 0), 0);
-
 export const about = {
   kicker: "About",
-  title: "From ERP and IT support to cloud backends.",
-  story: [
-    "I build backend software in Java: Spring Boot services with REST APIs, Spring Security and MySQL, packaged with Docker and tested with JUnit and Mockito. In Blood Bank Finder that means BCrypt-hashed passwords, per-IP rate limiting, a multi-stage Docker build and a Railway config that health-checks the app through Actuator, not just endpoints that return data.",
-    "I care about the parts that have to be provably right. My Suzuki-Kasami simulator is checked by 400 randomized runs (about 1.2 million events) that verify after every event that exactly one token exists and at most one process is in the critical section. Cloud engineering is the next layer I am adding: AWS, Kubernetes and CI/CD, on top of my MCA in Cloud Computing at Parul University.",
-    "I started in operations. For 2+ years I worked in ERP systems at two manufacturing companies in Vapi (Focus 9 at Hi-Tech Inks, SAP HANA at Sarla Performance Fibers) and was the IT support contact for 15 to 20 colleagues. It taught me to build for the person using the system: a wrong entry becomes a wrong report. I also lead a four-member research team on first-year cloud ERP cost estimation for manufacturing SMEs, and I am looking for an entry-level Software Engineer or Cloud Engineer role.",
+  title: "Software Engineer and Cloud Engineer, at a glance.",
+  intro:
+    "Entry-level. MCA (Cloud Computing) student with 2+ years in ERP and IT support. I build full stack and AI projects, test them, deploy them on Vercel, Neon and Supabase, and put the numbers and the limits in the README.",
+  groups: [
+    {
+      title: "What I build",
+      items: [
+        "Full stack web apps: React front ends with Node.js, FastAPI or Spring Boot back ends on PostgreSQL, MySQL or SQLite.",
+        "AI apps: document question answering with RAG and hybrid search (BM25 and vectors) on a local model (Llama 3.2 through Ollama), and text sentiment analysis with Naive Bayes.",
+        "REST APIs with login, roles and security: Spring Security, scrypt hashing, e-mail OTP, account lock, Row Level Security.",
+        "Distributed computing: simulators of Suzuki-Kasami and Ricart-Agrawala with fault injection.",
+      ],
+    },
+    {
+      title: "Numbers from my projects",
+      items: [
+        "144 pytest tests in Sovereign AI Workbench, 73 end-to-end API checks in Attendly, 35 self-tests in the Sentiment app, 640 random test runs in the Suzuki-Kasami simulator.",
+        "Sovereign AI Workbench: the right file and page ranked first for 20 of 20 test questions, 20 of 20 answers correct with a citation, 2 of 2 out-of-scope questions refused, 8.9 s median per answer.",
+        "Attendly: 76 API endpoints, 19 tables, 4 roles, 620 screens checked from 320 to 1280 px.",
+        "Blood Bank Finder: Row Level Security on 11 tables, map data cached for 15 minutes per area.",
+        "Suzuki-Kasami at N = 10: 9.78 messages per entry against 18 for Ricart-Agrawala.",
+      ],
+    },
+    {
+      title: "Cloud and DevOps",
+      items: [
+        "Docker and Docker Compose, Git and GitHub, GitHub Actions (tests, web build and Docker image builds on every push), Maven.",
+        "Deployed on Vercel (serverless functions), Neon (PostgreSQL) and Supabase.",
+        "MCA in Cloud Computing at Parul University.",
+      ],
+    },
+    {
+      title: "Background",
+      items: [
+        "2+ years in ERP and IT support at 2 manufacturing companies in Vapi: SAP HANA at Sarla Performance Fibers (Jun 2025 to Jun 2026) and Focus 9 at Hi-Tech Inks (Mar 2023 to May 2024).",
+        "IT support contact for 15 to 20 colleagues at Sarla. Best Employee of the Month at Hi-Tech Inks.",
+        "Leader of a 4-member research team on first-year cloud ERP cost estimation for manufacturing SMEs (in progress).",
+        "BCA at Patliputra University (2022 to 2025).",
+      ],
+    },
+    {
+      title: "Right now",
+      items: [
+        "Open to entry-level Software Engineer and Cloud Engineer roles.",
+        "SigmaX at Apna College since Aug 2026: DSA in Java, MERN, AI integration and DevOps. The program projects are due May 2027.",
+        "Learning AWS, Kubernetes, CI/CD, MongoDB and Express. See the Cloud Lab.",
+      ],
+    },
   ],
   facts: [
     { value: "2+", label: "years in ERP and IT support" },
     // counted from the lists above, so it updates when you add a project
     { value: String(projects.length + miniProjects.length), label: "projects on GitHub" },
-    // added up from the "REST endpoints" numbers in the stats of the Java projects (10 + 16 today), so it updates when `projects` changes
-    { value: String(javaRestEndpoints), label: "REST endpoints built in Java" },
+    // 144 pytest tests + 73 end-to-end API checks + 35 self-tests (see the project stats above)
+    { value: "252", label: "tests and checks in 3 projects" },
     { value: "4", label: "members in the research team I lead" },
   ],
-  /** from the original CV (not on resume v7C) */
+  /** from the original CV (not on the resume) */
   spoken: "Hindi (native), English (professional), Gujarati (basic)",
 };
 
@@ -358,7 +575,7 @@ export interface Job {
 }
 
 /**
- * Newest first. The bullets are the duties from the resume (v7C) and the original CV, written out one
+ * Newest first. The bullets are the duties from the resume and the original CV, written out one
  * duty per bullet. The numbers (15 to 20 colleagues, 9 to 10 and 8 to 9 records a day, 13 reports a week)
  * are Sachin's own. If a line is not true for you, delete it: recruiters ask about every line.
  */
@@ -415,17 +632,78 @@ export const education = [
   },
 ];
 
-export const skills = [
-  { group: "Languages", items: ["Java", "OOP", "Collections", "Streams", "JavaScript", "Python", "SQL", "HTML", "CSS"] },
-  { group: "Frameworks", items: ["Spring Boot", "Spring MVC", "Spring Security", "Spring Data JPA", "Hibernate"] },
-  { group: "Cloud and DevOps", items: ["Docker", "Git", "GitHub", "Maven", "Spring Boot Actuator", "Railway"] },
-  { group: "Backend and Testing", items: ["REST APIs", "Authentication", "MySQL", "JUnit", "Postman", "Swagger"] },
-  { group: "Core Concepts", items: ["DSA", "DBMS", "Distributed Computing", "Cloud-Native Architecture"] },
-  { group: "ERP and Support", items: ["SAP HANA", "Focus 9 ERP", "Troubleshooting", "Technical Support", "Data Handling", "Excel"] },
+/** "used" = it is in a project on my GitHub. "learning" = I am studying it now (SigmaX and my MCA). */
+export type SkillLevel = "used" | "learning";
+
+export interface SkillItem {
+  name: string;
+  level: SkillLevel;
+  /** the projects that prove it. Only write what is true: recruiters ask about every line. Leave it out when there is nothing to point at. */
+  where?: string;
+}
+
+export interface SkillTrack {
+  title: string;
+  items: SkillItem[];
+}
+
+export const skillsHead = { kicker: "Skills", title: "Skills for both roles." };
+
+export const skillsIntro = "Used means it is in a project on my GitHub. Learning means I am studying it now, at SigmaX and in my MCA.";
+
+/** The Skills page: two columns, one for each job title. Every row says Used or Learning. */
+export const skillTracks: SkillTrack[] = [
+  {
+    title: "Software Engineering",
+    items: [
+      { name: "Java", level: "used", where: "Suzuki-Kasami Simulator, Sentiment Analysis App, Tic-Tac-Toe" },
+      { name: "Python", level: "used", where: "Sovereign AI Workbench" },
+      { name: "JavaScript and TypeScript", level: "used", where: "Attendly, Blood Bank Finder, Birthday Surprise" },
+      { name: "React, Vite, PWA", level: "used", where: "Blood Bank Finder, Birthday Surprise, Sovereign AI Workbench, Attendly (PWA)" },
+      { name: "Node.js", level: "used", where: "Attendly" },
+      { name: "Spring Boot, Spring Security, JPA", level: "used", where: "first version of Blood Bank Finder" },
+      { name: "REST APIs", level: "used", where: "Attendly (76 endpoints), Sovereign AI Workbench (30 endpoints)" },
+      { name: "SQL: PostgreSQL, MySQL, SQLite", level: "used", where: "Attendly, Blood Bank Finder, Sovereign AI Workbench" },
+      { name: "Data Structures and Algorithms", level: "used", where: "Minimax in Tic-Tac-Toe, 2 algorithms in the Suzuki-Kasami Simulator" },
+      { name: "Testing: pytest, JUnit, Postman", level: "used", where: "144 pytest tests in Sovereign AI Workbench, 73 API checks in Attendly" },
+      { name: "Git and GitHub", level: "used", where: "every project" },
+      { name: "MongoDB and Express", level: "learning", where: "SigmaX (MERN)" },
+    ],
+  },
+  {
+    title: "Cloud Engineering",
+    items: [
+      { name: "Docker and Docker Compose", level: "used", where: "Sovereign AI Workbench, Sentiment Analysis App, first version of Blood Bank Finder" },
+      { name: "GitHub Actions (CI)", level: "used", where: "tests, web build and Docker image builds on every push in Sovereign AI Workbench" },
+      { name: "Vercel and serverless functions", level: "used", where: "Attendly, Blood Bank Finder, Suzuki-Kasami Simulator, Birthday Surprise, this site" },
+      { name: "Cloud PostgreSQL: Neon, Supabase", level: "used", where: "Attendly (Neon), Blood Bank Finder and Birthday Surprise (Supabase)" },
+      { name: "AWS: EC2, S3, IAM, VPC", level: "learning", where: "SigmaX and MCA Cloud Computing" },
+      { name: "Kubernetes", level: "learning", where: "SigmaX (DevOps)" },
+      { name: "CI/CD pipelines to AWS", level: "learning", where: "next step after GitHub Actions" },
+    ],
+  },
 ];
 
-/** Shown as the "Currently Building" island and the "Currently Learning" tag group. */
-export const learning = ["AWS", "Kubernetes", "CI/CD", "React", "Node.js", "Express", "MongoDB"];
+/** Smaller groups under the two columns: keywords recruiters search for. */
+export const moreSkills = [
+  { group: "AI", items: ["RAG", "Hybrid search", "BM25", "Vector search", "Ollama", "Llama 3.2", "Naive Bayes", "Sentiment analysis"] },
+  { group: "Core concepts", items: ["OOP", "Collections", "Streams", "DBMS", "Distributed Computing", "Cloud-Native Architecture"] },
+  { group: "ERP and support", items: ["SAP HANA", "Focus 9 ERP", "Troubleshooting", "Technical Support", "Data Handling", "Excel"] },
+];
+
+/** Shown in the Cloud Lab under "Learning now". */
+export const learning = ["AWS", "Kubernetes", "CI/CD", "MongoDB", "Express", "DSA in Java"];
+
+/** Shown in the Cloud Lab under "Cloud and DevOps work": what is already done, in facts. Only write what is in a repo. */
+export const cloudWork = [
+  "Docker and Docker Compose: Sovereign AI Workbench (backend and web app), the Sentiment Analysis App (Dockerfile) and the first version of Blood Bank Finder (Spring Boot and MySQL).",
+  "GitHub Actions: on every push to Sovereign AI Workbench it runs 144 tests, builds the web app and builds the Docker images. The Suzuki-Kasami Simulator and the Sentiment Analysis App have CI too.",
+  "Serverless: one Vercel function serves all 76 Attendly API routes. Blood Bank Finder uses 2 functions, one for map data (cached 15 minutes per area) and one for the assistant.",
+  "Managed databases: PostgreSQL on Neon (Attendly) and on Supabase with Row Level Security on 11 tables (Blood Bank Finder).",
+];
+
+/** The 3D Cloud Lab island (the half-built tower with a crane) floats the first five of these above it. */
+export const building = { tags: ["Docker", "GitHub Actions", "Vercel", "AWS", "Kubernetes"] };
 
 export const sigmax = {
   title: "SigmaX: AI Powered 10X Software Engineer",
@@ -435,10 +713,10 @@ export const sigmax = {
   status: "In progress" as "In progress" | "Completed",
   covers: "DSA in Java, MERN, AI integration and DevOps",
   projectsDue: "May 2027",
-  // Program projects are DUE May 2027. They are planned, not finished. Never show them as completed.
-  // When one is really built: delete its name here and add it to `miniProjects` (small) or `projects` (full case study).
-  // When the list is empty the "Planned program projects" part is hidden by itself.
-  plannedProjects: ["Zerodha Clone on AWS", "Zoom Clone", "GitHub Clone", "LinkedIn Clone", "Airbnb Clone", "3 AI full stack projects"] as string[],
+  // Program projects are DUE May 2027. They are not finished and not started here. Never show them as completed.
+  // When one is really built: delete its name here and add it to `miniProjects` (small) or `projects` (major).
+  // When the list is empty the "Program projects" part is hidden by itself.
+  programProjects: ["Zerodha Clone on AWS", "Zoom Clone", "GitHub Clone", "LinkedIn Clone", "Airbnb Clone", "3 AI full stack projects"] as string[],
 };
 
 export const certifications = [
@@ -465,8 +743,8 @@ export const islands: Record<IslandId, IslandMeta> = {
     title: "Projects",
     short: "Projects",
     // counted from the lists, so adding a project updates this sentence
-    blurb: `${projects.length} case stud${projects.length === 1 ? "y" : "ies"} (${projects.map((p) => p.name).join(", ")})${
-      miniProjects.length ? ` and ${miniProjects.length} smaller project${miniProjects.length === 1 ? "" : "s"}` : ""
+    blurb: `${projects.length} major project${projects.length === 1 ? "" : "s"} with screenshots, numbers and code${
+      miniProjects.length ? `, and ${miniProjects.length} minor project${miniProjects.length === 1 ? "" : "s"}` : ""
     }.`,
   },
   research: {
@@ -486,9 +764,10 @@ export const islands: Record<IslandId, IslandMeta> = {
   building: {
     id: "building",
     index: "04",
-    title: "Currently Building",
-    short: "Building",
-    blurb: "Construction zone: AWS, Kubernetes, CI/CD, React and Node.js.",
+    title: "Cloud Lab",
+    short: "Cloud Lab",
+    // made from the projects with status "building" (if any) and from `learning`
+    blurb: `${inProgress.length ? `In progress: ${joinList(inProgress.map((p) => p.name))}. ` : ""}Where my apps run, and what I am learning now: ${joinList(learning.slice(0, 3))}.`,
   },
 };
 
@@ -497,5 +776,5 @@ export const islandOrder: IslandId[] = ["projects", "research", "experience", "b
 export const site = {
   title: "Sachin Kumar | Software Engineer and Cloud Engineer",
   description:
-    "Entry-level Software Engineer and Cloud Engineer from Vadodara, India. Java, Spring Boot, MySQL, Docker. MCA (Cloud Computing) student with 2+ years in ERP and IT support.",
+    "Entry-level Software Engineer and Cloud Engineer in Vadodara, India. Java, Python, React, Node.js, PostgreSQL, Docker. Full stack and AI projects deployed to the cloud, with tests and screenshots.",
 };

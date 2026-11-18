@@ -34,6 +34,7 @@ export default function Loader() {
         setGone(true);
         return;
       }
+      const wipe = st.lite ? 0.85 : 1.15;
       const tl = gsap.timeline({
         onComplete: () => {
           useStore.getState().finishReveal();
@@ -43,8 +44,8 @@ export default function Loader() {
       tl.to(num.current, { yPercent: -30, opacity: 0, duration: 0.5, ease: "power3.in" }, 0)
         .to(label.current, { opacity: 0, duration: 0.3 }, 0)
         .add(() => useStore.getState().beginReveal(), 0.25)
-        .fromTo(root.current, { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.15, ease: "power4.inOut" }, 0.25)
-        .fromTo(edge.current, { top: "100%" }, { top: "0%", duration: 1.15, ease: "power4.inOut" }, 0.25)
+        .fromTo(root.current, { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 100% 0%)", duration: wipe, ease: "power4.inOut" }, 0.25)
+        .fromTo(edge.current, { top: "100%" }, { top: "0%", duration: wipe, ease: "power4.inOut" }, 0.25)
         .to(edge.current, { opacity: 0, duration: 0.2 }, ">-0.1");
     };
 
@@ -55,9 +56,10 @@ export default function Loader() {
       last = now;
       const el = (now - t0) / 1000;
       const st = useStore.getState();
-      const minTime = st.reducedMotion ? 0.3 : 1.7;
+      // the 3D city needs time to compile its shaders, the 2D page has nothing to wait for, so its splash is shorter
+      const minTime = st.reducedMotion ? 0.3 : st.lite ? 0.7 : 1.7;
       if (st.ready && el >= minTime) {
-        p = Math.min(100, p + dt * 110);
+        p = Math.min(100, p + dt * (st.lite ? 220 : 110));
       } else {
         const creep = 90 * (1 - Math.exp(-el / 1.5));
         p += (creep - p) * (1 - Math.exp(-dt * 5));
@@ -78,7 +80,11 @@ export default function Loader() {
   return (
     <div ref={root} className="loader fixed inset-0 z-[100] bg-ink text-fog" role="status" aria-live="polite" aria-label="Loading the portfolio">
       <div ref={label} className="label absolute left-6 right-6 top-6 flex justify-between text-mute sm:left-10 sm:right-10 sm:top-9">
-        <span>{profile.name}</span>
+        <span className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="" width={32} height={32} className="h-8 w-8" />
+          {profile.name}
+        </span>
         <span>Portfolio / Cloud City</span>
       </div>
       <div className="absolute bottom-10 left-6 sm:bottom-12 sm:left-10">

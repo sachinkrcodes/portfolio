@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { miniProjects, projectLinks, type MiniProject } from "@/data/content";
-import { ArrowUpRight, Bullets } from "./CaseStudy";
+import { ArrowUpRight, Bullets, StatusChip } from "./CaseStudy";
 
 /**
  * Cards for the smaller projects (`miniProjects` in src/data/content.ts). Shared by the 3D panel and the 2D page.
@@ -15,14 +15,31 @@ function MiniCard({ m, level, variant }: { m: MiniProject; level: 3 | 4 | 5; var
   return (
     <li id={m.id} className={`${variant === "glass" ? "glass glass-panel p-5 sm:p-7" : "tile"} scroll-mt-24 flex flex-col`}>
       <p className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="meta">{m.kind}</span>
-        {m.status === "building" && <span className="chip chip-accent">In progress</span>}
+        <StatusChip status={m.status} />
+        {m.when && <span className="meta">{m.when}</span>}
       </p>
-      {createElement(`h${level}`, { className: "display mt-2 text-[1.35rem] leading-tight" }, m.name)}
+      <p className="meta mt-3">{m.kind}</p>
+      {createElement(`h${level}`, { className: "display mt-1.5 text-[1.35rem] leading-tight" }, m.name)}
       <p className="mt-3 text-[0.95rem] leading-relaxed text-fog/85">{m.summary}</p>
       <div className="mt-4">
         <Bullets items={m.points} />
       </div>
+      {(m.progress || m.next) && (
+        <dl className="mt-4 space-y-3 text-[0.95rem] leading-relaxed text-fog/85">
+          {m.progress && (
+            <div>
+              <dt className="meta">Works today</dt>
+              <dd className="mt-1">{m.progress}</dd>
+            </div>
+          )}
+          {m.next && (
+            <div>
+              <dt className="meta">Still to do</dt>
+              <dd className="mt-1">{m.next}</dd>
+            </div>
+          )}
+        </dl>
+      )}
       <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tech">
         {m.stack.map((t) => (
           <li key={t} className="chip">

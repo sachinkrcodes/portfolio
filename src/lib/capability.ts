@@ -3,6 +3,8 @@ export interface Capability {
   reducedMotion: boolean;
   coarse: boolean;
   small: boolean;
+  /** the screen itself is phone sized (its short side is under 600 CSS px). "Desktop site" mode and landscape make the viewport wide, the screen stays small. */
+  phone: boolean;
   lowPower: boolean;
 }
 
@@ -24,6 +26,7 @@ export function detectCapability(): Capability {
     reducedMotion: mq("(prefers-reduced-motion: reduce)"),
     coarse: mq("(pointer: coarse)"),
     small: window.innerWidth < 820,
+    phone: Math.min(window.screen?.width || 9999, window.screen?.height || 9999) < 600,
     lowPower: (navigator.hardwareConcurrency ?? 8) <= 2 || (nav.deviceMemory ?? 8) <= 2,
   };
 }
@@ -45,7 +48,8 @@ export function chooseLite(cap: Capability): boolean {
     /* storage blocked: ignore */
   }
   if (!cap.webgl2) return true;
-  if (cap.coarse && cap.small) return true;
+  // phones always get the 2D page (also in landscape and in "Desktop site" mode): 3D with live blur is too heavy for them
+  if (cap.coarse && (cap.small || cap.phone)) return true;
   if (cap.lowPower) return true;
   return false;
 }

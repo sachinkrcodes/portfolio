@@ -528,7 +528,7 @@ body[data-perf="0"] .glass.glass-accent {
 }
 
 .marquee-track {
-  animation: marquee 46s linear infinite;
+  animation: marquee 31s linear infinite;
   will-change: transform;
 }
 
@@ -578,6 +578,9 @@ body[data-perf="0"] .glass.glass-accent {
 .lite-sky {
   position: fixed;
   inset: 0;
+  /* as tall as the screen gets with the browser toolbars hidden: when they slide in and out while you scroll, the sky is not resized and repainted */
+  height: 100vh;
+  height: 100lvh;
   z-index: -1;
   background:
     radial-gradient(1px 1px at 12% 18%, rgb(255 255 255 / 0.8) 50%, transparent 51%), radial-gradient(1px 1px at 34% 62%, rgb(255 255 255 / 0.6) 50%, transparent 51%),
@@ -994,5 +997,44 @@ header .glass,
     grid-column: 2;
     grid-row: 2;
     align-self: end;
+  }
+}
+
+/* ------------------------------------------------------------------ touch screens: flat glass, no film grain
+ * A blur has to be redrawn on every frame of a scroll, and a phone is the device that can least afford it.
+ * So with a finger as the main pointer the glass becomes a flat dark fill: same shapes, same colours, same look as the lowest quality tier.
+ * The film grain (a screen-sized layer over everything) goes too. Links to a section glide with the browser's own smooth scrolling.
+ * Last in the file and outside the @layer blocks on purpose: it has to win over every rule above.
+ */
+@media (pointer: coarse) {
+  .glass,
+  .glass-panel,
+  .glass-accent,
+  .cursor-ring {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .glass {
+    background: linear-gradient(145deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.05)), var(--ink-2);
+  }
+  .glass-panel {
+    background: linear-gradient(155deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02)), var(--ink-2);
+  }
+  .glass.glass-accent {
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.4) 0%, rgb(255 255 255 / 0) 46%), linear-gradient(135deg, var(--c-cyan), color-mix(in srgb, var(--c-cyan) 76%, var(--c-blue)));
+  }
+  /* the bars that float over the page get a solid fill, so the text behind them does not show through now that there is no blur */
+  header .glass,
+  .marquee.glass {
+    background-color: var(--ink-2);
+  }
+  .grain::after {
+    display: none;
+  }
+}
+@media (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

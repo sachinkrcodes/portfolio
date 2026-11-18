@@ -1,11 +1,20 @@
 import { createElement, type ReactNode } from "react";
 import { projectLinks, research, type Project } from "@/data/content";
+import Shots from "./Shots";
 
 /**
  * The case study layout, shared by the glass panel in the 3D city and the 2D page, so both always say the same thing.
- * Sections: Problem, What I built, Tech, Highlights, Links. Everything comes from src/data/content.ts.
+ * Sections: Screenshots, Problem, What I built, Tech, Highlights, Where it stands (projects in progress), Links.
+ * Everything comes from src/data/content.ts.
  * It only uses flat pieces (.chip, .tile, .hair), because it sits inside a glass surface.
  */
+
+/** "In progress" or "Completed", for a project or a minor project. Shows nothing when the project has no status. */
+export function StatusChip({ status }: { status?: "done" | "building" }) {
+  if (status === "building") return <span className="chip chip-accent">In progress</span>;
+  if (status === "done") return <span className="chip">Completed</span>;
+  return null;
+}
 
 export function ArrowUpRight() {
   return (
@@ -41,10 +50,13 @@ export function Stats({ stats, className }: { stats: { value: string; label: str
   );
 }
 
-/** A titled block with a hairline above it. `first` drops the hairline (for the first block under a page heading). */
-export function Section({ title, level, first = false, children }: { title: string; level: 3 | 4; first?: boolean; children: ReactNode }) {
+/**
+ * A titled block with a hairline above it. `first` drops the hairline (for the first block under a page heading).
+ * `flush` also drops the space above it (for the first block inside a card that has its own padding).
+ */
+export function Section({ title, level, first = false, flush = false, children }: { title: string; level: 3 | 4; first?: boolean; flush?: boolean; children: ReactNode }) {
   return (
-    <section className={first ? "mt-8" : "mt-9"}>
+    <section className={flush ? "" : first ? "mt-8" : "mt-9"}>
       {!first && <div className="hair mb-5" aria-hidden="true" />}
       {createElement(`h${level}`, { className: "sec-title mb-4" }, title)}
       {children}
@@ -76,11 +88,16 @@ interface BodyProps {
 
 export function ProjectBody({ p, level = 2, rise = false, statsClass = "grid-cols-2" }: BodyProps & { p: Project }) {
   const sub = (level + 1) as 3 | 4;
+  const where = p.progress || p.next;
   return (
     <Blocks rise={rise}>
       {[
-        <p key="k" className="flex flex-wrap gap-2">
+        <p key="k" className="flex flex-wrap items-center gap-2">
           <span className="chip chip-accent">{p.kind}</span>
+        </p>,
+        <p key="w" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <StatusChip status={p.status} />
+          {p.when && <span className="meta">{p.when}</span>}
         </p>,
         createElement(`h${level}`, { key: "t", className: "display mt-5 text-[clamp(2rem,3.3vw,3.1rem)] leading-[0.98]" }, p.name),
         <p key="s" className="mt-4 text-[1.05rem] leading-relaxed text-fog/85">
@@ -89,6 +106,11 @@ export function ProjectBody({ p, level = 2, rise = false, statsClass = "grid-col
         <div key="st" className="mt-7">
           <Stats stats={p.stats} className={statsClass} />
         </div>,
+        p.shots?.length ? (
+          <Section key="sh" title="Screenshots" level={sub}>
+            <Shots shots={p.shots} name={p.name} />
+          </Section>
+        ) : null,
         <Section key="p" title="Problem" level={sub}>
           <p className="text-[0.98rem] leading-relaxed text-fog/80">{p.problem}</p>
         </Section>,
@@ -114,7 +136,26 @@ export function ProjectBody({ p, level = 2, rise = false, statsClass = "grid-col
         <Section key="h" title="Highlights" level={sub}>
           <Bullets items={p.highlights} />
         </Section>,
+        where ? (
+          <Section key="wh" title="Where it stands" level={sub}>
+            <dl className="space-y-4 text-[0.98rem] leading-relaxed text-fog/85">
+              {p.progress && (
+                <div>
+                  <dt className="meta">Works today</dt>
+                  <dd className="mt-1.5">{p.progress}</dd>
+                </div>
+              )}
+              {p.next && (
+                <div>
+                  <dt className="meta">Still to do</dt>
+                  <dd className="mt-1.5">{p.next}</dd>
+                </div>
+              )}
+            </dl>
+          </Section>
+        ) : null,
         <Section key="l" title="Links" level={sub}>
+          {p.liveNote && !p.liveUrl && <p className="mb-4 text-[0.95rem] leading-relaxed text-fog/80">{p.liveNote}</p>}
           <div className="flex flex-wrap gap-3">
             {projectLinks(p).map((l, i) => (
               <a
@@ -131,7 +172,7 @@ export function ProjectBody({ p, level = 2, rise = false, statsClass = "grid-col
             ))}
           </div>
         </Section>,
-      ]}
+      ].filter(Boolean) as ReactNode[]}
     </Blocks>
   );
 }

@@ -18,7 +18,12 @@ export const contentType = "image/png";
 const font = (name: string) => readFile(join(process.cwd(), "src/app/_og", name));
 
 export default async function OpengraphImage() {
-  const [display, sans] = await Promise.all([font("Bricolage-ExtraBold.ttf"), font("InstrumentSans-Medium.ttf")]);
+  const [display, sans, logoFile] = await Promise.all([
+    font("Bricolage-ExtraBold.ttf"),
+    font("InstrumentSans-Medium.ttf"),
+    readFile(join(process.cwd(), "public/logo.png")),
+  ]);
+  const logo = `data:image/png;base64,${logoFile.toString("base64")}`;
 
   return new ImageResponse(
     <div style={{ width: 1200, height: 630, display: "flex", position: "relative", background: INK, color: FOG, fontFamily: "Instrument Sans" }}>
@@ -40,8 +45,10 @@ export default async function OpengraphImage() {
 
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 760, height: 630, padding: "64px 0 60px 72px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 0, whiteSpace: "nowrap" }}>
-          <div style={{ display: "flex", alignItems: "center", fontSize: 22, letterSpacing: 3, color: MUTE, textTransform: "uppercase" }}>
-            <div style={{ width: 14, height: 14, borderRadius: 14, background: CYAN, marginRight: 16, boxShadow: `0 0 18px ${CYAN}` }} />
+          <div style={{ display: "flex", alignItems: "center", fontSize: 20, letterSpacing: 2, color: MUTE, textTransform: "uppercase" }}>
+            {/* the logo (public/logo.png) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logo} width={56} height={56} alt="" style={{ marginRight: 14 }} />
             Portfolio / Cloud City
           </div>
           <div style={{ display: "flex", fontSize: 22, color: CYAN }}>{profile.openTo}</div>
@@ -49,12 +56,13 @@ export default async function OpengraphImage() {
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontFamily: "Bricolage Grotesque", fontSize: 94, lineHeight: 1, letterSpacing: -3, color: FOG, whiteSpace: "nowrap" }}>{profile.name}</div>
-          <div style={{ fontSize: 37, marginTop: 24, color: CYAN, whiteSpace: "nowrap" }}>{profile.role}</div>
+          <div style={{ fontSize: 33, marginTop: 24, color: CYAN, whiteSpace: "nowrap" }}>{profile.role}</div>
           <div style={{ fontSize: 32, marginTop: 20, lineHeight: 1.3, color: MUTE, maxWidth: 640 }}>{profile.headline}</div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center" }}>
-          {profile.stack.map((s) => (
+          {/* the first four fit on one line next to the islands */}
+          {profile.stack.slice(0, 4).map((s) => (
             <div
               key={s}
               style={{

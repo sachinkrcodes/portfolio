@@ -20,7 +20,8 @@ function PlayIcon() {
 }
 
 /**
- * Bottom marquee. The list is rendered twice so the loop is seamless; the copy is hidden from screen readers.
+ * Bottom marquee. The list is rendered four times (the loop moves by half the track, so it needs an even number of copies, and each list is
+ * wider than a screen); only the first is read by screen readers.
  * It moves by itself for longer than five seconds, so there is a Pause button (and it also pauses under the mouse,
  * and stands still when the visitor asked their device for reduced motion).
  */
@@ -56,7 +57,7 @@ export default function Ticker() {
       <div className="h-full min-w-0 flex-1 overflow-hidden rounded-full" style={{ maskImage: "linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent)" }}>
         <div className="marquee-track flex h-full w-max items-center">
           {row(false)}
-          {[1, 2, 3, 4, 5].map((k) => (
+          {[1, 2, 3].map((k) => (
             <div key={k} className="flex shrink-0">
               {row(true)}
             </div>

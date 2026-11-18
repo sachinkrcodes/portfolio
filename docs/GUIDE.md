@@ -22,22 +22,30 @@ npm run start
 
 Everything you read on the site comes from one file: `src/data/content.ts`.
 Edit it and the 3D labels, panels, the 2D page, the ticker, the menu, the share picture and the screen reader copy all update.
-Counts such as "5 projects on GitHub" and "3 case studies and 2 smaller projects" are calculated from the lists,
+Counts such as "8 projects on GitHub" and "5 major projects with screenshots, numbers and code, and 3 minor projects" are calculated from the lists,
 so they stay right by themselves.
 
 ### I want to... (the recipes)
 
 | I want to | Do this |
 | --- | --- |
-| Add a project with a full case study | Add an object to `projects` (copy the Blood Bank one). It appears in the Projects panel, the next / previous buttons, the 2D page, the screen reader copy, gets a share link `/#its-id` and, if there is room, its own building in the 3D city (see "More than three projects"). |
-| Add a small project | Add an object to `miniProjects` (copy Tic-Tac-Toe). One card: what it is, 2 to 4 facts, stack, links. |
-| Finish a SigmaX project | Delete its name from `sigmax.plannedProjects`, then add it to `miniProjects` (small) or `projects` (full case study). Do the second step only when there is code to show. |
+| Add a major project with a full case study | Add an object to `projects` (copy the Attendly one). It appears in the Projects panel, the next / previous buttons, the 2D page, the screen reader copy, gets a share link `/#its-id` and, if there is room, its own building in the 3D city (see "More than three projects"). |
+| Add a minor project | Add an object to `miniProjects` (copy Tic-Tac-Toe). One card: what it is, 2 to 4 facts, stack, links. |
+| Show a project as "in progress" | Set `status: "building"`, `when: "Started Nov 2026"`, `progress` (one line: what works today) and `next` (one line: what is left). It then shows an "In progress" chip and appears in **Cloud Lab** under "In progress" by itself. |
+| Mark a project as finished | Change `status` to `"done"` (the chip then says "Completed"), change `when` to `"Built Dec 2026"` and delete `progress` and `next`. It leaves the "In progress" list in Cloud Lab by itself, and when nothing is in progress that list is hidden. |
+| Add or change screenshots | Put 3 JPG files (about 1200 px wide, under 100 KB each) in `public/projects/<project id>/` and list them in `shots` with a one line caption each (what the picture shows). The build stops if a file is missing. |
+| Change the words on the 3D Cloud Lab island | `building.tags` (the five floating words). In the panel, "In progress" comes from the projects marked in progress, "Where my apps run" from `runsOn` on each project, "Cloud and DevOps work" from `cloudWork`, and "Learning now" from `learning`. |
+| Rename Cloud Lab (for example back to "Currently Building") | In `islands.building` change `title` and `short`. The menu, the label, the 2D page and the screen reader copy follow. |
+| Add or change a skill | `skillTracks` has two tracks: Software Engineering and Cloud Engineering. A skill is `{ name, level, where }`. Use `level: "used"` only when the skill is in code on your GitHub, and put the project names in `where` (the page shows them under the skill). Use `"learning"` for the rest. Move a skill from learning to used on the day you ship something with it. The counts ("11 used, 1 learning") are calculated. |
+| Say where a project runs | Set `runsOn` on the project, for example `"Vercel (site and API) and Neon (PostgreSQL)"`. It shows in Cloud Lab under "Where my apps run", next to the Live demo button. |
+| Change the first words of the page | `profile.headline` (the big line), `profile.role` (the line under it) and `profile.stack` (the tech line). |
+| Finish a SigmaX project | Delete its name from `sigmax.programProjects`, then add it to `miniProjects` (minor) or `projects` (major). Do the second step only when there is code to show. |
 | Add a live link to a project | Set its `liveUrl` (and optionally `liveLabel`). The button appears first. **Open the link in a private window first** (see "Before you share the link"). |
 | Add a job or change a title | `jobs` (newest first) and `profile.role` / `profile.headline`. |
 | Add a certificate | `certifications`. |
 | Update the resume PDF | Replace `public/Sachin_Kumar_Resume.pdf` (same file name). Nothing else changes. |
 | Change my GitHub or LinkedIn name | Change `profile.github` and `profile.linkedin`, and the `repo` link of every project (find and replace the old name in `content.ts`). The resume PDF has the same two links printed on it, so rebuild or replace it too. |
-| Change the About text | `about.story` (three short paragraphs) and `about.facts` (four tiles). Keep it to facts you can prove. |
+| Change the About text | `about.intro` (two lines), `about.groups` (the bullet points, in groups) and `about.facts` (four tiles). Keep it to facts you can prove. |
 | Change the ticker at the bottom | `milestones`. |
 | Change the colours | `src/lib/palette.ts`, see below. |
 | Change what a link preview says | `site.title` and `site.description` in `content.ts`. The picture is made from your name, role, headline and stack. |
@@ -49,10 +57,10 @@ When the course is done and you only want to show major projects, the whole chan
 
 1. **`projects`**: add each major project as a full case study (copy an existing one). The 3D Projects island builds itself
    from this list and has room for **six buildings**. A seventh project still shows in the panel, the 2D page and the screen reader copy.
-2. **`miniProjects`**: set it to `[]`. An empty list hides every "More projects" part by itself (the 3D panel, the 2D page and the screen reader copy). Or keep the ones you like.
-3. **`about`**: replace the whole object: `title`, `story` (three short paragraphs) and `facts` (four tiles).
-4. **`sigmax`**: set `status` to `"Completed"` and `plannedProjects` to `[]` (the planned list then disappears).
-5. **`milestones`, `learning`, `skills`, `profile.summary`, `site.description`**: update the words that mention what you are learning.
+2. **`miniProjects`**: set it to `[]`. An empty list hides every "Minor projects" part by itself (the 3D panel, the 2D page and the screen reader copy). Or keep the ones you like.
+3. **`about`**: replace the whole object: `title`, `intro`, `groups` (bullet points) and `facts` (four tiles).
+4. **`sigmax`**: set `status` to `"Completed"` and `programProjects` to `[]` (the program project list then disappears).
+5. **`milestones`, `learning`, `skillTracks`, `cloudWork`, `profile.summary`, `site.description`**: update the words that mention what you are learning.
    `profile.role` and `profile.headline` change if your title does.
 6. **`public/Sachin_Kumar_Resume.pdf`**: replace it with the new resume (same file name).
 
@@ -61,9 +69,9 @@ Then run `npm run build` once. The build checks `content.ts` and stops with a pl
 
 ### More than three projects (the 3D buildings)
 
-Each project in `projects` gets a building on the Projects island. The first three (Blood Bank Finder, Sentiment Analysis,
+Each project in `projects` gets a building on the Projects island. Three (Blood Bank Finder, Sentiment Analysis,
 Suzuki-Kasami) have buildings modelled on the projects and keep their spots. Every other project gets one of three
-generic styles in turn, or the one you name with the optional `building` field:
+generic styles in turn, or the one you name with the optional `building` field (Sovereign AI Workbench is `"tiers"`, Attendly is `"dish"`):
 
 | `building` | Looks like |
 | --- | --- |
@@ -76,25 +84,29 @@ except as a building. The camera angles, labels and hit areas for new buildings 
 
 ### Details of the data
 
-- `projects`: each one has `kind`, `stats`, `problem`, `built`, `tech`, `highlights`, `repo`, optional `liveUrl`, `liveLabel`,
-  `building` and extra `links`. The numbers in `stats` were counted from the code. If you change the code, recount.
-- `miniProjects`: `id`, `name`, `kind`, `summary`, `points`, `stack`, `repo`, optional `liveUrl`, `liveLabel`, `status`.
+- `projects`: each one has `kind`, `stats`, `problem`, `built`, `tech`, `highlights`, `repo`, optional `liveUrl`, `liveLabel`, `liveNote`,
+  `building`, `shots` and extra `links`, the progress fields `status`, `when`, `progress`, `next`, and `runsOn` (where it is hosted). The numbers in `stats` come from the READMEs and were
+  counted from the code. If you change the code, recount.
+- `miniProjects`: `id`, `name`, `kind`, `summary`, `points`, `stack`, `repo`, optional `liveUrl`, `liveLabel`, `runsOn` and the same progress fields.
 - `research`: the paper. When you have results, change `outcome` and `status`.
-- `about`: no dates in it, so it does not go out of date. The "projects on GitHub" tile is counted.
-  The "26 REST endpoints" tile is 10 (Blood Bank Finder) + 16 (Sentiment Analysis app): change it if you add or remove endpoints.
+- `about`: `intro`, `groups` (bullet points), `facts` (four tiles), `spoken`. The "projects on GitHub" tile is counted from the project lists.
+  The "252 tests and checks" tile is 144 (Sovereign AI Workbench) + 73 (Attendly) + 35 (Sentiment app): change it when those numbers change.
 - `jobs`: each role has a one line `summary`, the `highlights` bullets and the `skills` chips.
   Delete any line that is not true: recruiters ask about every line.
-- `sigmax`: shown in the certifications as "In progress", with its projects marked as planned (due May 2027).
-  It is not mentioned in About on purpose.
-- `milestones` (the bottom ticker), `learning`, `skills`, `certifications`, `education`.
+- `sigmax`: shown in Cloud Lab and in the certifications as "In progress". Its program projects are listed with their due date (May 2027)
+  and are never shown as started or finished. Move a project out of the list only when its code exists.
+- `milestones` (the bottom ticker), `learning`, `building`, `skillsHead`, `skillsIntro`, `skillTracks`, `moreSkills`, `cloudWork`, `certifications`, `education`.
 
-**Blood Bank Finder has no live link right now.** The repository is a full Spring Boot application (server, database, Docker),
-and the browser-only demo that used to be hosted for it was removed from GitHub. The site says only what can be checked:
-the code is public, with a README that has the run steps. When you host the app publicly, add `liveUrl` (and `liveLabel`)
-to that project and a "Live demo" button appears first.
+**Live links.** Attendly, Blood Bank Finder, Suzuki-Kasami Simulator and Birthday Surprise have a `liveUrl`, copied from their READMEs.
+Sovereign AI Workbench (runs on a laptop) and the Sentiment app have none: the card says so with `liveNote` or simply shows the source link.
+Open each live link in a private window before you share the site. A project with a `liveUrl` shows a "Live demo" button first.
+
+**The two Blood Bank repos.** The site points at `blood-bank-finder-live` (the live React and Supabase version). The first version,
+a Spring Boot, MySQL and Docker app, is mentioned in the case study but its repository is not linked, because it is not on your GitHub list now.
 
 **Safety net:** every build runs `src/data/validate.ts` over `content.ts`. A duplicate project id, a link that is not
-https, or a GitHub link that is not a GitHub link stops the build with a plain message (so it can never go live).
+https, a GitHub link that is not a GitHub link, or a screenshot file that does not exist stops the build with a plain message (so it can never go live).
+A project marked in progress without a `progress`, `next` or `when` line prints a warning.
 Long dashes and leftover TODOs are printed as warnings in the build log.
 
 ## Contact form
@@ -140,7 +152,7 @@ All of this is generated from `content.ts` and the site address, so it never goe
 | --- | --- | --- |
 | Title, description, canonical address, Open Graph and Twitter tags | `src/app/layout.tsx` | words come from `site.title` and `site.description` |
 | Share picture (1200 x 630) | `src/app/opengraph-image.tsx`, `twitter-image.tsx` | name, role, headline, stack and the four islands, drawn from `content.ts`. Fonts for it are in `src/app/_og/` |
-| Favicon, phone home screen icon, web app manifest | `icon.tsx`, `apple-icon.tsx`, `manifest.ts` | the same small mark everywhere |
+| Logo, favicon, phone home screen icon, web app manifest | `src/app/icon.png`, `apple-icon.png`, `favicon.ico`, `public/icon-192.png`, `public/icon-512.png`, `public/logo.png`, `manifest.ts` | the same 3D cloud logo everywhere. To change it, replace these picture files (same names and sizes: 192, 180, 512, 128 px). The artwork of the 512 px file sits inside its middle 80%, so a phone can cut it into a circle |
 | Search data (JSON-LD: a Person and the WebSite) | `src/components/SemanticMirror.tsx` | tells Google who you are and where you studied |
 | `robots.txt` and `sitemap.xml` | `robots.ts`, `sitemap.ts` | one page, because the whole portfolio is the home page |
 | 404 and error pages | `not-found.tsx`, `error.tsx`, `global-error.tsx` | in the same style, with a way back |
@@ -178,12 +190,13 @@ A quiet ambient sound and small cues, made live with the browser's Web Audio (no
 
 ## Menu and smooth scrolling
 
-- The **Menu** button (top right, in both the 3D city and the 2D page) opens a glass sheet with Home, About, Projects,
-  Experience and Contact, plus Resume, GitHub, LinkedIn, email, sound and the 2D / 3D switch. The current place is marked.
+- The **Menu** button (top right, in both the 3D city and the 2D page) opens a glass sheet with Home, About, Projects, Skills,
+  Experience, Cloud Lab and Contact, plus Resume, GitHub, LinkedIn, email, sound and the 2D / 3D switch. The current place is marked.
   Esc closes it, Tab stays inside it, and focus goes back to the button. In the city it flies the camera; on the 2D page it scrolls.
 - On screens narrower than 768 px the top bar shows only Resume and Menu, and everything else is in the menu, so nothing is ever cut off.
+  In the 3D city the Skills button joins the top bar from 1024 px; below that it is only in the menu.
 - Wheel scrolling is smoothed with Lenis: on the 2D page, and inside the glass panel in the city. Touch screens keep their
-  own native scrolling, and visitors who ask their system for less motion get no smoothing at all.
+  own native scrolling (Lenis is not even started there), and visitors who ask their system for less motion get no smoothing at all.
   Keys that scroll by themselves (Home, End, Page Down, Space, arrows) and the scrollbar win even in the second after a wheel scroll,
   when the smooth glide is still running (`src/lib/useSmoothScroll.ts`).
 
@@ -202,6 +215,29 @@ the hover test runs every third frame and only while exploring; the page loads t
 
 Phones and low-power devices get the 2D page automatically. Tablets and laptops get the 3D city.
 
+### Phone scrolling
+
+The 2D page was laggy on phones. Measured causes: about 21 blurred glass elements that the phone had to redraw on every frame of a scroll,
+a film-grain layer the size of the screen, Lenis listening to touch events (which can hold up the browser's own scrolling),
+and a scroll tracker that re-rendered the whole page whenever the current section changed. What was done:
+
+- On touch screens the glass is a flat fill with the same shapes and colours, and the grain layer is off. This is the last block in `src/app/globals.css`.
+- Lenis is not started on touch screens (`src/lib/useSmoothScroll.ts`). Links to a section glide with the browser's own smooth scrolling.
+- The page content is memoised, so a change of the current section re-renders only the top bar (`src/components/lite/LiteSite.tsx`).
+- The ticker has 4 copies of its text instead of 6, and the sky behind the 2D page uses the large viewport height, so it does not resize when the address bar hides.
+- A phone always gets the 2D page, also held sideways and in "Desktop site" mode. The rule looks at the size of the screen as well as the window (`phone` in `src/lib/capability.ts`).
+
+Measured on an emulated phone (headless Chromium, 412 x 915 px at 2x, CPU slowed 4 times, 30 touch swipes down the whole page):
+
+| | Before | After |
+| --- | --- | --- |
+| Average frame time | 21.5 ms | 16.7 ms |
+| Frames slower than 33 ms | 470 of 1,750 (27%) | 5 of 2,165 (0.2%) |
+| Blurred elements | 21 | 0 |
+| Browser work during the test | 8.5 s | 3.1 s |
+
+16.7 ms is a perfect 60 fps frame. This is an emulated phone, not a real one: see "What was tested, and what was not".
+
 ## Phones, tablets and laptops
 
 Checked at 360, 390, 412 and 640 px wide (phones), 700, 768 and 1024 px (tablets), and 1280, 1366, 1440 and 1920 px (laptops and desktops),
@@ -215,6 +251,7 @@ no sideways scrolling, nothing cut off or overlapping, no console errors.
 - The hero uses `svh` units and scales its headline down in landscape and on short screens.
 - The slide-out menu scrolls inside itself if a screen is too short, and on a phone held sideways it switches to two columns
   (the pages on the left, the links on the right) so nothing is cut off.
+- A phone gets the 2D page, also held sideways and in "Desktop site" mode. The 3D city is still one tap away (the "3D" switch in the menu) and remembered after that.
 - The bottom ticker has a Pause button (it also pauses under the mouse, and stands still for people who asked for reduced motion).
 - In the 3D hero on a narrow screen, an island label that would end up behind the title or behind the top bar or ticker steps aside until the
   visitor starts exploring (`LabelProjector.tsx`). On a wide laptop screen nothing moves.
@@ -253,10 +290,12 @@ Every case study has its own address, and it updates as you open one:
 
 | Link | Opens |
 | --- | --- |
+| `/#sovereign-ai-workbench` | Sovereign AI Workbench case study |
+| `/#attendly` | Attendly case study |
 | `/#blood-bank-finder` | Blood Bank Finder case study |
 | `/#sentiment-analysis-app` | Sentiment Analysis Web App case study |
 | `/#suzuki-kasami-simulator` | Suzuki-Kasami Simulator case study |
-| `/#tic-tac-toe`, `/#attendly` | The Projects panel (2D page: that project's card) |
+| `/#birthday-surprise`, `/#cloud-city-portfolio`, `/#tic-tac-toe` | The Projects panel (2D page: that project's card) |
 | `/#research` | The research page |
 | `/#about` | The About panel (the whole city in view) |
 | `/#contact` | The Contact panel with the form |
@@ -275,8 +314,8 @@ In the 3D city the camera flies there after the intro. On the 2D page the same l
 | `?perf=1` / `?perf=0` | Lighter effects (no grain and MSAA / no bloom and no glass blur either). Also pinned |
 | `?debug` | Exposes `window.__city` in the console (camera rig, store, renderer, sound engine) |
 
-Without a `?perf` switch the automatic quality control is on. Phones, browsers without WebGL2 and low-power devices get the
-2D version automatically, so nobody is ever blocked from reading the resume.
+Without a `?perf` switch the automatic quality control is on. Phones (also sideways and in "Desktop site" mode), browsers without WebGL2
+and low-power devices get the 2D version automatically, so nobody is ever blocked from reading the resume.
 
 ## Deploy on Vercel
 
@@ -309,6 +348,10 @@ the share images and every search file over HTTP, the sound engine (switch, memo
 (unit tests and inside the real page), the layout checks at the sizes listed above, an axe-core accessibility scan, a measured text-contrast scan,
 and a check that every GitHub and LinkedIn link on every surface (page, menu, search data, resume PDF) uses your current name.
 
+After the Skills, Cloud Lab and phone scrolling update, the 2D page was checked again at 1440, 390 and 320 px (no sideways scroll, no broken images, no console errors),
+the 3D city at 1440, 1024, 768, 360 and 320 px, and phones sideways and in "Desktop site" mode (both get the 2D page).
+The phone scroll numbers above come from an emulated phone with the CPU slowed 4 times, with raw touch swipes and frame times read from `requestAnimationFrame`.
+
 **Not tested** (nobody had these here): real iPhones and Android phones, Safari and Firefox, the real frame rate on a graphics card,
 screen reader software (NVDA, VoiceOver), and your live Vercel links. Do the "Before you share the link" list on your own devices.
 
@@ -318,9 +361,10 @@ screen reader software (NVDA, VoiceOver), and your live Vercel links. Do the "Be
 src/
   app/
     layout.tsx, page.tsx, globals.css   page shell and metadata, styles (glass, tokens, menu, form fields, touch sizes)
-    opengraph-image.tsx, twitter-image.tsx, icon.tsx, apple-icon.tsx, manifest.ts, robots.ts, sitemap.ts
+    opengraph-image.tsx, twitter-image.tsx, manifest.ts, robots.ts, sitemap.ts
+    icon.png, apple-icon.png, favicon.ico   the logo as tab icon and phone icon
     not-found.tsx, error.tsx, global-error.tsx
-    _og/                                fonts and shapes for the share picture and icons
+    _og/                                fonts and shapes for the share picture
     api/contact/route.ts                the contact form's server side
   data/
     content.ts                          ALL content
@@ -329,13 +373,15 @@ src/
   lib/
     site.ts               the public address of the site
     palette.ts            the two colours, and every shade made from them
-    capability.ts         3D or 2D decision, starting quality
+    capability.ts         3D or 2D decision (phones always get 2D), starting quality
+    lite-mode.ts          the switch from the 2D page to the 3D city (goTo3D)
     actions.ts            go home, open About / Contact / an island, switch 2D / 3D
     contact.ts            form rules, used by the browser and by the server
     sound.ts              the sound engine (Web Audio): ambient bed, cues, limiter
-    useSmoothScroll.ts    Lenis for the 2D page and for the glass panel
+    useSmoothScroll.ts    Lenis for the 2D page and for the glass panel (not started on touch screens)
   components/
     Root.tsx              picks 3D or 2D, mounts the layers
+    Experience3D.tsx      the whole 3D layer (scene, labels, top bar, panel, cursor), loaded only when 3D is used
     DeepLink.tsx          keeps the address bar and the camera in step (share links)
     SemanticMirror.tsx    plain HTML copy of the content for screen readers and search engines, plus the search data
     SoundBridge.tsx       connects sound cues to hover, panels and buttons
@@ -355,7 +401,10 @@ src/
       SceneCanvas.tsx     the canvas, the ready signal, the quality control wiring
     ui/
       CaseStudy.tsx       the case study layout, shared by the 3D panel and the 2D page
-      MiniProjects.tsx    cards for the smaller projects
+      Shots.tsx           the screenshots of a project (large picture, caption, small pictures to switch)
+      Building.tsx        the Cloud Lab panel: where my apps run, cloud and DevOps work, learning now, SigmaX (and projects in progress, when there are any)
+      Skills.tsx          the two skill tracks, shared by the 3D panel and the 2D page
+      MiniProjects.tsx    cards for the minor projects
       Profile.tsx         About, work history timeline, education, certifications
       Contact.tsx         the contact block (intro, form, other routes)
       ContactForm.tsx     the form itself (validation, sending, fallbacks)
@@ -388,5 +437,4 @@ re-renders, quality tiers with automatic quality control, and the whole 3D bundl
 - If `npm run dev` shows a "hydration" warning in the browser, it is almost always an extension (ad blocker, dark mode,
   translator) adding tags to the page before it loads. The page sets its colours on the `<html>` element, so extensions
   can no longer break it. Try a private window to confirm. A production build never shows that overlay.
-- The resume PDF in `public/` is version v7C. It says "Software Developer and Cloud Engineer"; the site says "Software Engineer and Cloud Engineer".
-  Re-export the resume when you want them to match.
+- The resume PDF in `public/` is version v10 (Nov 17 2026). It says "Software Engineer and Cloud Engineer (Entry-Level)", the same as the site.

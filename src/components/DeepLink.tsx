@@ -13,7 +13,7 @@ function targetFromHash(hash: string): Target | null {
     /* keep the raw text */
   }
   if (!id) return null;
-  if (id === "about" || id === "contact") return { island: id };
+  if (id === "about" || id === "skills" || id === "contact") return { island: id };
   // any case study in content.ts works, with or without a building on the island (no building: the camera shows the island)
   if (projects.some((p) => p.id === id)) return { island: "projects", sub: id };
   // a mini project has no close-up: open the Projects panel, where its card is listed

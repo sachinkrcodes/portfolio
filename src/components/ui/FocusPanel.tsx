@@ -1,13 +1,15 @@
 "use client";
 
 import { Fragment, useEffect, useRef } from "react";
-import { about, islands, learning, miniProjects, projects, type IslandId } from "@/data/content";
+import { about, islands, miniProjects, projects, skillsHead, type IslandId } from "@/data/content";
 import { usePanelScroll } from "@/lib/useSmoothScroll";
 import { useStore } from "@/store/useStore";
-import { ProjectBody, ResearchBody, Section } from "./CaseStudy";
+import { BuildingBody } from "./Building";
+import { ProjectBody, ResearchBody, Section, StatusChip } from "./CaseStudy";
 import { ContactBody } from "./Contact";
 import { MiniProjectList } from "./MiniProjects";
 import { AboutBody, ExperienceBody } from "./Profile";
+import { SkillsBody } from "./Skills";
 
 const subs = projects.map((p) => p.id);
 
@@ -45,7 +47,8 @@ function IslandDetail({ id }: { id: IslandId }) {
 
       {id === "projects" && (
         <Rise i={2}>
-          <ul className="mt-8 space-y-3">
+          <h3 className="sec-title mb-4 mt-8">Major projects</h3>
+          <ul className="space-y-3">
             {projects.map((p) => (
               <li key={p.id}>
                 <button
@@ -57,6 +60,12 @@ function IslandDetail({ id }: { id: IslandId }) {
                   <span>
                     <span className="meta block">{p.kind}</span>
                     <span className="display mt-1 block text-[1.35rem] leading-tight">{p.name}</span>
+                    {p.status && (
+                      <span className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <StatusChip status={p.status} />
+                        {p.when && <span className="meta">{p.when}</span>}
+                      </span>
+                    )}
                   </span>
                   <Arrow dir="right" className="shrink-0 text-accent transition-transform group-hover:translate-x-1" />
                 </button>
@@ -68,7 +77,7 @@ function IslandDetail({ id }: { id: IslandId }) {
 
       {id === "projects" && miniProjects.length > 0 && (
         <Rise i={3}>
-          <Section title="More projects" level={3}>
+          <Section title="Minor projects" level={3}>
             <MiniProjectList level={4} />
           </Section>
         </Rise>
@@ -76,15 +85,7 @@ function IslandDetail({ id }: { id: IslandId }) {
 
       {id === "experience" && <ExperienceBody rise start={2} />}
 
-      {id === "building" && (
-        <Rise i={2} className="mt-8 flex flex-wrap gap-2">
-          {learning.map((t) => (
-            <span key={t} className="chip">
-              {t}
-            </span>
-          ))}
-        </Rise>
-      )}
+      {id === "building" && <BuildingBody rise start={2} onOpen={(sub) => focusOn({ island: "projects", sub })} />}
     </>
   );
 }
@@ -99,6 +100,21 @@ function AboutDetail() {
       </Rise>
       <div className="mt-6">
         <AboutBody rise start={1} />
+      </div>
+    </>
+  );
+}
+
+/** Skills has no island either: the same wide shot, with the two skill columns beside it. */
+function SkillsDetail() {
+  return (
+    <>
+      <Rise i={0}>
+        <p className="sec-title">{skillsHead.kicker}</p>
+        <h2 className="display mt-4 text-balance text-[clamp(2.1rem,3.5vw,3.3rem)] leading-[0.97]">{skillsHead.title}</h2>
+      </Rise>
+      <div className="mt-6">
+        <SkillsBody rise start={1} />
       </div>
     </>
   );
@@ -250,6 +266,8 @@ export default function FocusPanel() {
                 </>
               ) : focus.island === "about" ? (
                 <AboutDetail />
+              ) : focus.island === "skills" ? (
+                <SkillsDetail />
               ) : focus.island === "contact" ? (
                 <ContactDetail />
               ) : focus.island === "research" ? (

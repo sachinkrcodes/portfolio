@@ -11,29 +11,29 @@ Portfolio website of Sachin Kumar for recruiters and hiring managers: a 3D city 
 
 - Built a 3D city of 4 islands with no image or 3D-model files. Every shape is made in code, with 15 hand-written GLSL shaders (sky, clouds, platforms, lines, particles).
 - Added automatic quality control: quality drops after 2 seconds under 46 fps and rises after 6 seconds over 57 fps, across 6 steps down to minimal effects at 55% resolution.
-- Built a 2D page from the same content file. It is the default on phones, without WebGL2, and on machines with 2 or fewer CPU cores or 2 GB of memory.
-- Measured the first visit with an empty cache: the 2D page sends 305 kB in 16 requests, the 3D city 584 kB, because three.js loads only in 3D mode (headless Chromium, `npm run start`, gzip).
-- Wrote the contact form's server route: JSON only, 10 KB limit, same-site check, honeypot field, 5 messages per 10 minutes per IP, then sends through Resend or Formspree.
+- Built a 2D page from the same content file. Phones always get it, also sideways. First visit, empty cache, gzip: 431 kB in 17 requests, against 633 kB in 18 for the 3D city.
+- Fixed laggy phone scrolling. On an emulated phone (CPU slowed 4 times, 30 touch swipes) frames over 33 ms went from 27% to 0.2% after blur, film grain and Lenis were turned off on touch screens.
+- Skills tags each of 19 skills Used (with its projects) or Learning. Every project has 3 real screenshots, and `npm run build` fails if a screenshot file is missing.
 
 ## Screenshots
 
-![3D city on a laptop with four islands labelled Projects, Research, Experience and Currently Building](docs/screenshots/01-hero-3d.jpg)
+![3D city on a laptop with four islands labelled Projects, Research, Experience and Cloud Lab](docs/screenshots/01-hero-3d.jpg)
 
 The 3D city after the loader. Click an island, or use the menu, and the camera flies to it.
 
-![Projects panel open beside the 3D city](docs/screenshots/02-projects-3d.jpg)
+![Projects panel open beside the 3D city, projects marked Completed](docs/screenshots/02-projects-3d.jpg)
 
-The Projects island opens a side panel with 3 case studies and 2 smaller projects.
+The Projects island opens a side panel with 5 case studies and 3 smaller projects.
 
-![Case study panel for the Sentiment Analysis Web App](docs/screenshots/03-case-study-3d.jpg)
+![Case study panel for the Sovereign AI Workbench with its numbers](docs/screenshots/03-case-study-3d.jpg)
 
 One case study. The left and right arrow keys move to the previous and next project, and Esc closes the panel.
 
-![2D page on a laptop, Projects section with the Blood Bank Finder case study](docs/screenshots/04-page-2d.jpg)
+![2D page on a laptop, Skills section with Used and Learning tags](docs/screenshots/04-page-2d.jpg)
 
-The 2D page (`/?mode=lite`): the same content with normal scrolling, and no three.js download.
+The 2D page (`/?mode=lite`): the same content with normal scrolling, and no three.js download. Each skill is tagged Used, with its projects, or Learning.
 
-![2D page on a phone, Blood Bank Finder case study with its numbers](docs/screenshots/05-phone-2d.jpg)
+![2D page on a phone, hero with the headline and both roles](docs/screenshots/05-phone-2d.jpg)
 
 The phone view (390 x 844 px). The 2D page is the default here.
 
@@ -45,10 +45,10 @@ All five screenshots are from `npm run start`, taken in headless Chromium with s
 - three.js 0.187 and React Three Fiber 9: draw the 3D city. This code loads only in 3D mode. postprocessing adds bloom, vignette and a film-grain pass. drei is used once, for `Billboard`.
 - GLSL: 15 shaders in `src/components/scene/shaders.ts`, wired up in `materials.ts`.
 - GSAP 3: camera flights between islands, the loader and the hero animation.
-- Lenis 1.3: smooth wheel scrolling on the 2D page and inside the side panel. Off for visitors who ask for reduced motion. Touch scrolling stays native.
+- Lenis 1.3: smooth wheel scrolling on the 2D page and inside the side panel. Off for visitors who ask for reduced motion and on touch screens, where scrolling stays native.
 - Zustand 5: one store for the mode, the open panel, the quality step and reduced motion. The 3D scene and the page UI both read it.
-- Tailwind CSS 4 and one `globals.css`: all styling, including the glass look.
-- Resend: sends the contact form as an email. Formspree works as the other option.
+- Tailwind CSS 4 and one `globals.css`: all styling, including the glass look. On touch screens the glass is a flat fill, because live blur is what made phones lag.
+- Resend: sends the contact form as an email (Formspree works as the other option). The route takes JSON only, 10 KB at most, same-site requests, a honeypot field and 5 messages per 10 minutes per IP.
 - Web Audio API: optional sound made in code, off by default, no audio files.
 - Vercel (Hobby plan): hosting.
 
@@ -83,7 +83,10 @@ Then open `http://localhost:3000`.
 
 ## Limits and next
 
-- Not done: the contact form's rate limit is kept in server memory, so on Vercel it counts per server instance, not for the whole site.               
+- Not done: the contact form's rate limit is kept in server memory, so on Vercel it counts per server instance, not for the whole site.
+- Not tested: real phones. The phone numbers above come from an emulated phone with the CPU slowed 4 times, so a real phone will give different numbers.
+- Next: move a skill from Learning to Used in `skillTracks` (`src/data/content.ts`) on the day a project ships with it.
+
 ## Author
 
 Sachin Kumar | [GitHub](https://github.com/sachinkrcodes) | [LinkedIn](https://www.linkedin.com/in/sachinkrcodes) | sachinkrcodes@gmail.com

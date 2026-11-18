@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import type * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { learning } from "@/data/content";
+import { building } from "@/data/content";
 import { IslandShell } from "../Island";
 import { getMats } from "../materials";
 import { Box, EdgeBox, StaticBoxes, TechTag, type InstSpec } from "../parts";
@@ -12,7 +12,7 @@ const FLOORS = 6;
 const SOLID = 3;
 const FH = 0.95;
 
-/** Where the floating tags hang. The words come from `learning` in content.ts (first five). */
+/** Where the floating tags hang. The words come from `building.tags` in content.ts (first five). */
 const TAG_SLOTS: Array<[number, number, number]> = [
   [-3.3, 5.4, 1.4],
   [2.9, 6.4, -1.4],
@@ -21,7 +21,7 @@ const TAG_SLOTS: Array<[number, number, number]> = [
   [0.3, 7.3, 1.4],
 ];
 
-/** "Currently Building": a tower that is only part built, a crane, hazard barriers and floating tech tags. */
+/** "Cloud Lab" (island 04): a tower that is only part built, a crane, hazard barriers and floating tech tags. */
 export default function BuildingIsland() {
   const mats = getMats();
   const jib = useRef<THREE.Group>(null);
@@ -82,7 +82,7 @@ export default function BuildingIsland() {
 
       <StaticBoxes specs={barriers} material={mats.hazard} />
 
-      {learning.slice(0, TAG_SLOTS.length).map((text, i) => (
+      {building.tags.slice(0, TAG_SLOTS.length).map((text, i) => (
         <TechTag key={text} text={text} position={TAG_SLOTS[i]} phase={i * 1.3} />
       ))}
     </IslandShell>

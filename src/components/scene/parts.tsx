@@ -168,7 +168,7 @@ function makeTagTexture(text: string) {
   return tex;
 }
 
-/** A floating label that always faces the camera. Used on the "Currently Building" island. */
+/** A floating label that always faces the camera. Used on the "Cloud Lab" island. */
 export function TechTag({ text, position, phase = 0 }: { text: string; position: V3; phase?: number }) {
   const tex = useMemo(() => makeTagTexture(text), [text]);
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, depthWrite: false }), [tex]);

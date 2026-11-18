@@ -17,6 +17,14 @@ export function openAbout() {
   st.focusOn({ island: "about" });
 }
 
+/** "Skills": the whole city stays in view and the Software Engineering and Cloud Engineering skills open beside it. */
+export function openSkills() {
+  const st = useStore.getState();
+  if (!st.revealed) return;
+  if (st.mode === "focus" && st.focus?.island === "skills") return;
+  st.focusOn({ island: "skills" });
+}
+
 /** "Contact": the whole city stays in view and the contact form opens beside it. */
 export function openContact() {
   const st = useStore.getState();
@@ -26,7 +34,7 @@ export function openContact() {
 }
 
 /** Open one island's panel (used by the slide-out menu). */
-export function openIsland(id: "projects" | "experience") {
+export function openIsland(id: "projects" | "research" | "experience" | "building") {
   const st = useStore.getState();
   if (!st.revealed) return;
   if (st.mode === "focus" && st.focus?.island === id && !st.focus.sub) return;

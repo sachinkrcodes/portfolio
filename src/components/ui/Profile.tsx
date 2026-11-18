@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import { about, certifications, education, jobs, learning, profile, sigmax, skills } from "@/data/content";
+import { about, certifications, education, jobs, profile, sigmax } from "@/data/content";
 import { ArrowUpRight, Blocks, Bullets, Section, Stats } from "./CaseStudy";
 
 /**
@@ -31,48 +31,24 @@ interface AboutProps {
   start?: number;
   /** grid for the four fact tiles */
   statsClass?: string;
-  /** grid for the skill groups */
-  skillsClass?: string;
   /** show the resume, GitHub, LinkedIn and email chips (the 2D page has them in its header and contact section) */
   links?: boolean;
 }
 
-/** The story, four facts, the skills by group, what I am learning, spoken languages and links. */
-export function AboutBody({ rise = false, start = 0, statsClass = "grid-cols-2", skillsClass = "", links = true }: AboutProps) {
+/** The short intro, four facts, bullet points in groups (what I build, numbers, cloud, background, right now), spoken languages and links. The skills have their own page (Skills.tsx). */
+export function AboutBody({ rise = false, start = 0, statsClass = "grid-cols-2", links = true }: AboutProps) {
   const blocks = [
-    <div key="story" className="space-y-4 text-[1.02rem] leading-relaxed text-fog/85">
-      {about.story.map((p) => (
-        <p key={p}>{p}</p>
-      ))}
-    </div>,
+    <p key="intro" className="text-[1.02rem] leading-relaxed text-fog/85">
+      {about.intro}
+    </p>,
     <div key="facts" className="mt-8">
       <Stats stats={about.facts} className={statsClass} />
     </div>,
-    <Section key="skills" title="Skills" level={3}>
-      <dl className={`grid gap-x-10 gap-y-5 ${skillsClass}`}>
-        {skills.map((g) => (
-          <div key={g.group}>
-            <dt className="meta">{g.group}</dt>
-            <dd className="mt-2 flex flex-wrap gap-2">
-              {g.items.map((t) => (
-                <span key={t} className="chip">
-                  {t}
-                </span>
-              ))}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </Section>,
-    <Section key="learning" title="Currently learning" level={3}>
-      <ul className="flex flex-wrap gap-2">
-        {learning.map((t) => (
-          <li key={t} className="chip chip-accent">
-            {t}
-          </li>
-        ))}
-      </ul>
-    </Section>,
+    ...about.groups.map((g) => (
+      <Section key={g.title} title={g.title} level={3}>
+        <Bullets items={g.items} />
+      </Section>
+    )),
     <Section key="spoken" title="Spoken languages" level={3}>
       <p className="text-[0.98rem] text-fog/80">{about.spoken}</p>
     </Section>,
@@ -158,7 +134,7 @@ export function EducationList() {
   );
 }
 
-/** SigmaX first (marked in progress or completed; its unfinished projects are marked planned and the list hides when empty), then the certificates. */
+/** SigmaX first (marked in progress or completed; its program projects are listed with their due date and the list hides when empty), then the certificates. */
 export function CertificationList() {
   return (
     <div className="space-y-6">
@@ -170,11 +146,11 @@ export function CertificationList() {
         <p className="display mt-3 text-[1.2rem] leading-tight">{sigmax.title}</p>
         <p className="meta mt-1">{sigmax.issuer}</p>
         <p className="mt-3 text-[0.95rem] leading-relaxed text-fog/80">Covers {sigmax.covers}.</p>
-        {sigmax.plannedProjects.length > 0 && (
+        {sigmax.programProjects.length > 0 && (
           <>
-            <p className="meta mt-4">Planned program projects, due {sigmax.projectsDue}</p>
+            <p className="meta mt-4">Program projects, due {sigmax.projectsDue}</p>
             <ul className="mt-2 flex flex-wrap gap-2">
-              {sigmax.plannedProjects.map((p) => (
+              {sigmax.programProjects.map((p) => (
                 <li key={p} className="chip">
                   {p}
                 </li>
