@@ -17,27 +17,35 @@ Portfolio website of Sachin Kumar for recruiters and hiring managers: a 3D city 
 
 ## Screenshots
 
-![3D city on a laptop with four islands labelled Projects, Research, Experience and Cloud Lab](docs/screenshots/01-hero-3d.jpg)
+![3D city with four floating islands labelled Projects, Research, Experience and Cloud Lab](docs/screenshots/01-city-3d.jpg)
 
-The 3D city after the loader. Click an island, or use the menu, and the camera flies to it.
+The 3D city in explore mode: four islands (Projects, Research, Experience, Cloud Lab). Drag to pan, scroll to zoom, click an island and the camera flies to it.
 
-![Projects panel open beside the 3D city, projects marked Completed](docs/screenshots/02-projects-3d.jpg)
+![Cloud Lab panel open beside the 3D city, listing where each app runs](docs/screenshots/02-cloud-lab-3d.jpg)
 
-The Projects island opens a side panel with 5 case studies and 3 smaller projects.
+The Cloud Lab island opened. The panel lists where each app runs (Vercel, Neon, Supabase) with a Live demo button, and the island shows Docker, Kubernetes, GitHub Actions, Vercel and AWS.
 
-![Case study panel for the Sovereign AI Workbench with its numbers](docs/screenshots/03-case-study-3d.jpg)
+![2D page hero with the headline, both roles and the tech stack](docs/screenshots/03-hero-2d.jpg)
 
-One case study. The left and right arrow keys move to the previous and next project, and Esc closes the panel.
+The 2D page (the 2D button, or `/?mode=lite`): the same content with normal scrolling and no three.js download. Phones get this page by default.
 
-![2D page on a laptop, Skills section with Used and Learning tags](docs/screenshots/04-page-2d.jpg)
+![Attendly case study on the 2D page, marked Completed, with four numbers](docs/screenshots/04-attendly-2d.jpg)
 
-The 2D page (`/?mode=lite`): the same content with normal scrolling, and no three.js download. Each skill is tagged Used, with its projects, or Learning.
+A project case study: Completed status, build dates, four numbers (76 API endpoints, 19 database tables, 73 end-to-end API checks, 4 roles), then screenshots of the app.
 
-![2D page on a phone, hero with the headline and both roles](docs/screenshots/05-phone-2d.jpg)
+![Sovereign AI Workbench case study on the 2D page, marked Completed, with four numbers](docs/screenshots/05-sovereign-2d.jpg)
 
-The phone view (390 x 844 px). The 2D page is the default here.
+Sovereign AI Workbench: 144 automated tests, 30 API endpoints, 20 of 20 test questions with the right file and page first, 3 agents with their own tools.
 
-All five screenshots are from `npm run start`, taken in headless Chromium with software WebGL.
+![Research section on the 2D page with the paper title and team numbers](docs/screenshots/06-research-2d.jpg)
+
+The Research section: a group paper on cloud ERP cost estimation for manufacturing SMEs. I lead the team of 4. It is still in progress.
+
+![Menu open on the 2D page with seven sections and four links](docs/screenshots/07-menu-2d.jpg)
+
+The menu: Home, About, Projects, Skills, Experience, Cloud Lab and Contact, plus Resume, GitHub, LinkedIn, Email, the switch to the 3D city and the sound button.
+
+All seven screenshots are of the finished site, taken on a laptop on 18 November 2026.
 
 ## Tech
 
